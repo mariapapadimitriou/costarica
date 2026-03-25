@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Pura Vida! — Maria's Costa Rica 2026</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,10 +19,11 @@
     <span class="deco deco-4">🌿</span>
   </div>
   <div class="header-content">
-    <p class="eyebrow">✈️ Live from Costa Rica</p>
+    <p class="eyebrow">📍 Toronto &rarr; San Jos&eacute;</p>
     <h1>Pura Vida!</h1>
     <p class="tagline">Maria's Costa Rica Adventure &middot; 2026</p>
-    <div class="trip-badge active">🟢 Currently Exploring</div>
+    <!-- STATUS OPTIONS: class="trip-badge departing" / "active" / "done" -->
+    <div class="trip-badge departing">✈️ Departing Soon</div>
   </div>
 </header>
 
@@ -56,12 +57,12 @@
     <div class="container">
       <div class="progress-label">
         <span>Trip Progress</span>
-        <!-- Update as you go! -->
-        <span>Stop 1 of 5</span>
+        <!-- Update as you go: "Stop 1 of 5", "Stop 2 of 5", etc. -->
+        <span>Not started yet!</span>
       </div>
       <div class="progress-bar">
-        <!-- Update width %: stop number / 5 * 100 -->
-        <div class="progress-fill" style="width: 20%"></div>
+        <!-- Update width: 0% pre-trip, 20% stop 1, 40% stop 2 ... 100% done -->
+        <div class="progress-fill" style="width: 0%"></div>
       </div>
     </div>
   </section>
@@ -74,25 +75,26 @@
       <div class="timeline">
 
         <!-- ============ STOP 1: SAN JOSÉ ============ -->
-        <!-- STATUS OPTIONS: class="timeline-item visited" / "current" / "upcoming" -->
-        <div class="timeline-item visited">
-          <div class="timeline-dot">✅</div>
+        <!-- To update: change class to "timeline-item current" then "timeline-item visited" -->
+        <!-- Also update the status-tag class + text, and the timeline-dot emoji -->
+        <div class="timeline-item upcoming">
+          <div class="timeline-dot">🔜</div>
           <div class="day-card">
             <div class="day-header">
               <div class="day-meta">
                 <span class="day-num">Stop 1</span>
               </div>
-              <span class="status-tag visited">Visited ✓</span>
+              <span class="status-tag upcoming">Upcoming</span>
             </div>
             <h3 class="location">🏙️ San José</h3>
-            <p class="desc">Arrival in the capital! Getting oriented, grabbing a coffee at Mercado Central, and soaking in the city before the adventure begins.</p>
+            <p class="desc">Landing in the capital! Getting oriented, grabbing a coffee at Mercado Central, and soaking in the city before the adventure begins.</p>
             <div class="highlights">
               <span>Mercado Central</span>
               <span>Gold Museum</span>
               <span>Barrio Amón</span>
               <span>Gallo Pinto</span>
             </div>
-            <!-- PHOTOS: replace placeholder with <img src="images/sanjose-1.jpg" alt="..."> -->
+            <!-- PHOTOS: swap placeholder with <img src="images/sanjose-1.jpg" alt="..."> -->
             <div class="photo-grid">
               <div class="photo-placeholder">📸 Photos coming soon</div>
             </div>
@@ -100,14 +102,14 @@
         </div>
 
         <!-- ============ STOP 2: COUP SAN JUAN ============ -->
-        <div class="timeline-item current">
-          <div class="timeline-dot pulse">📍</div>
+        <div class="timeline-item upcoming">
+          <div class="timeline-dot">🔜</div>
           <div class="day-card">
             <div class="day-header">
               <div class="day-meta">
                 <span class="day-num">Stop 2</span>
               </div>
-              <span class="status-tag current">Here Now! 🔥</span>
+              <span class="status-tag upcoming">Upcoming</span>
             </div>
             <h3 class="location">🌊 Coup San Juan</h3>
             <p class="desc">A hidden gem on the coast — laid-back beach vibes, fresh seafood, and the kind of spot you stumble upon and never want to leave.</p>
@@ -116,9 +118,8 @@
               <span>Fresh Seafood</span>
               <span>Local Life</span>
             </div>
-            <!-- PHOTOS: replace placeholder with <img src="images/coupsanjuan-1.jpg" alt="..."> -->
             <div class="photo-grid">
-              <div class="photo-placeholder upload-hint">📸 Upload photos here!<br><small>Drop .jpg files in the images/ folder and swap this placeholder with &lt;img&gt; tags</small></div>
+              <div class="photo-placeholder">📸 Stay tuned!</div>
             </div>
           </div>
         </div>
