@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pura Vida! — Maria's Costa Rica 2026</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-deco">
+    <span class="deco deco-1">🌿</span>
+    <span class="deco deco-2">🌺</span>
+    <span class="deco deco-3">🦜</span>
+    <span class="deco deco-4">🌿</span>
+  </div>
+  <div class="header-content">
+    <p class="eyebrow">✈️ Live from Costa Rica</p>
+    <h1>Pura Vida!</h1>
+    <p class="tagline">Maria's Costa Rica Adventure &middot; 2026</p>
+    <div class="trip-badge active">🟢 Currently Exploring</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Overview Stats -->
+  <section class="overview">
+    <div class="container">
+      <div class="overview-grid">
+        <div class="overview-card">
+          <span class="ov-icon">📅</span>
+          <span class="ov-label">Duration</span>
+          <span class="ov-value">14 Days</span>
+        </div>
+        <div class="overview-card">
+          <span class="ov-icon">📍</span>
+          <span class="ov-label">Destinations</span>
+          <span class="ov-value">6 Stops</span>
+        </div>
+        <div class="overview-card">
+          <span class="ov-icon">🌿</span>
+          <span class="ov-label">Vibes</span>
+          <span class="ov-value">Pure Adventure</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Progress Bar -->
+  <section class="progress-section">
+    <div class="container">
+      <div class="progress-label">
+        <span>Trip Progress</span>
+        <!-- Update the day number as you go! -->
+        <span>Day 3 of 14</span>
+      </div>
+      <div class="progress-bar">
+        <!-- Update the width % to match your progress (day/14 * 100) -->
+        <div class="progress-fill" style="width: 21%"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Itinerary Timeline -->
+  <section class="itinerary">
+    <div class="container">
+      <h2 class="section-title">The Itinerary</h2>
+
+      <div class="timeline">
+
+        <!-- ============ DAYS 1–2: SAN JOSÉ ============ -->
+        <!-- STATUS OPTIONS: class="timeline-item visited" / "current" / "upcoming" -->
+        <div class="timeline-item visited">
+          <div class="timeline-dot">✅</div>
+          <div class="day-card">
+            <div class="day-header">
+              <div class="day-meta">
+                <span class="day-num">Days 1–2</span>
+                <span class="day-date">Mar 22–23</span>
+              </div>
+              <span class="status-tag visited">Visited ✓</span>
+            </div>
+            <h3 class="location">🏙️ San José</h3>
+            <p class="desc">Arrival in the capital! Getting oriented, exploring the Mercado Central, and trying the best gallo pinto of my life.</p>
+            <div class="highlights">
+              <span>Mercado Central</span>
+              <span>Gold Museum</span>
+              <span>Barrio Amón</span>
+            </div>
+            <!-- PHOTOS: add <img src="images/sanjose-1.jpg" alt="..."> tags below -->
+            <div class="photo-grid">
+              <div class="photo-placeholder">📸 Photos coming soon</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ DAYS 3–5: ARENAL ============ -->
+        <div class="timeline-item current">
+          <div class="timeline-dot pulse">📍</div>
+          <div class="day-card">
+            <div class="day-header">
+              <div class="day-meta">
+                <span class="day-num">Days 3–5</span>
+                <span class="day-date">Mar 24–26</span>
+              </div>
+              <span class="status-tag current">Here Now! 🔥</span>
+            </div>
+            <h3 class="location">🌋 Arenal Volcano</h3>
+            <p class="desc">Staying at the base of the majestic Arenal Volcano. Hot springs, hiking lava fields, and hanging bridges through the rainforest.</p>
+            <div class="highlights">
+              <span>Arenal Volcano NP</span>
+              <span>Tabacón Hot Springs</span>
+              <span>Hanging Bridges</span>
+              <span>La Fortuna Waterfall</span>
+            </div>
+            <!-- PHOTOS: add <img src="images/arenal-1.jpg" alt="..."> tags below -->
+            <div class="photo-grid">
+              <div class="photo-placeholder upload-hint">📸 Upload photos here!<br><small>Drop .jpg files in the images/ folder and add &lt;img&gt; tags above</small></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ DAYS 6–7: MONTEVERDE ============ -->
+        <div class="timeline-item upcoming">
+          <div class="timeline-dot">🔜</div>
+          <div class="day-card">
+            <div class="day-header">
+              <div class="day-meta">
+                <span class="day-num">Days 6–7</span>
+                <span class="day-date">Mar 27–28</span>
+              </div>
+              <span class="status-tag upcoming">Upcoming</span>
+            </div>
+            <h3 class="location">☁️ Monteverde Cloud Forest</h3>
+            <p class="desc">Into the clouds! Ziplining through the canopy and spotting elusive resplendent quetzals in the misty cloud forest.</p>
+            <div class="highlights">
+              <span>Cloud Forest Reserve</span>
+              <span>Zipline Canopy</span>
+              <span>Quetzal Watching</span>
+            </div>
+            <div class="photo-grid">
+              <div class="photo-placeholder">📸 Stay tuned!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ DAYS 8–10: MANUEL ANTONIO ============ -->
+        <div class="timeline-item upcoming">
+          <div class="timeline-dot">🔜</div>
+          <div class="day-card">
+            <div class="day-header">
+              <div class="day-meta">
+                <span class="day-num">Days 8–10</span>
+                <span class="day-date">Mar 29–31</span>
+              </div>
+              <span class="status-tag upcoming">Upcoming</span>
+            </div>
+            <h3 class="location">🐒 Manuel Antonio</h3>
+            <p class="desc">Costa Rica's most beautiful national park. White sand beaches, monkeys swinging through the trees, and crystal clear Pacific waters.</p>
+            <div class="highlights">
+              <span>Manuel Antonio NP</span>
+              <span>Biesanz Beach</span>
+              <span>Kayaking</span>
+              <span>Sloth Spotting</span>
+            </div>
+            <div class="photo-grid">
+              <div class="photo-placeholder">📸 Stay tuned!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ DAYS 11–12: GUANACASTE ============ -->
+        <div class="timeline-item upcoming">
+          <div class="timeline-dot">🔜</div>
+          <div class="day-card">
+            <div class="day-header">
+              <div class="day-meta">
+                <span class="day-num">Days 11–12</span>
+                <span class="day-date">Apr 1–2</span>
+              </div>
+              <span class="status-tag upcoming">Upcoming</span>
+            </div>
+            <h3 class="location">🌅 Guanacaste / Tamarindo</h3>
+            <p class="desc">Beach days on the Pacific coast! Surfing lessons, sunset cocktails, and exploring the dry tropical forest of the Nicoya Peninsula.</p>
+            <div class="highlights">
+              <span>Tamarindo Beach</span>
+              <span>Surfing</span>
+              <span>Rincón de la Vieja</span>
+              <span>Sunset Views</span>
+            </div>
+            <div class="photo-grid">
+              <div class="photo-placeholder">📸 Stay tuned!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ DAYS 13–14: TORTUGUERO ============ -->
+        <div class="timeline-item upcoming">
+          <div class="timeline-dot">🔜</div>
+          <div class="day-card">
+            <div class="day-header">
+              <div class="day-meta">
+                <span class="day-num">Days 13–14</span>
+                <span class="day-date">Apr 3–4</span>
+              </div>
+              <span class="status-tag upcoming">Upcoming</span>
+            </div>
+            <h3 class="location">🐢 Tortuguero</h3>
+            <p class="desc">The last adventure — a remote Caribbean jungle reached only by boat or plane. Sea turtle nesting grounds and dense rainforest canals.</p>
+            <div class="highlights">
+              <span>Tortuguero NP</span>
+              <span>Canal Boat Tours</span>
+              <span>Turtle Nesting</span>
+              <span>Caribbean Vibes</span>
+            </div>
+            <div class="photo-grid">
+              <div class="photo-placeholder">📸 Stay tuned!</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /timeline -->
+    </div>
+  </section>
+
+  <!-- Comments via Utterances (GitHub Issues) -->
+  <section class="comments-section">
+    <div class="container">
+      <h2 class="section-title">Leave a Message 💬</h2>
+      <p class="comments-note">
+        Sign in with a free GitHub account to leave a comment — Maria will see it on the road! 🌴
+      </p>
+      <!--
+        utterances uses GitHub Issues for comments.
+        Make sure Issues are enabled in this repo's Settings.
+        Anyone with a GitHub account can comment — no extra setup needed for them.
+      -->
+      <script src="https://utteranc.es/client.js"
+              repo="mariapapadimitriou/costarica"
+              issue-term="pathname"
+              label="comment 💬"
+              theme="github-light"
+              crossorigin="anonymous"
+              async>
+      </script>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>Made with 🌴 &amp; Pura Vida spirit &nbsp;·&nbsp; <a href="https://github.com/mariapapadimitriou/costarica">View on GitHub</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

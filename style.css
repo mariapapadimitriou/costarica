@@ -1,0 +1,458 @@
+/* ===================================================
+   PURA VIDA — Costa Rica Itinerary Page
+   =================================================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green-dark:  #1b4332;
+  --green-mid:   #2d6a4f;
+  --green:       #40916c;
+  --green-light: #52b788;
+  --green-pale:  #b7e4c7;
+  --green-bg:    #f0f7f0;
+  --yellow:      #f4a261;
+  --orange:      #e76f51;
+  --blue:        #48cae4;
+  --white:       #ffffff;
+  --text:        #1b4332;
+  --muted:       #4a7c59;
+  --shadow:      0 4px 20px rgba(27,67,50,.12);
+  --shadow-lg:   0 8px 32px rgba(27,67,50,.18);
+  --radius:      16px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--green-bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ===================================================
+   HEADER
+   =================================================== */
+
+.site-header {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(150deg, #0d2b1d 0%, var(--green-dark) 40%, var(--green-mid) 80%, var(--green) 100%);
+  padding: 64px 20px 88px;
+  text-align: center;
+  color: #fff;
+}
+
+/* Subtle texture overlay */
+.site-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(82,183,136,.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(72,202,228,.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.header-deco {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.deco {
+  position: absolute;
+  font-size: 3rem;
+  opacity: .18;
+  animation: sway 5s ease-in-out infinite;
+}
+.deco-1 { top: 8%;  left: 4%;  animation-delay: 0s; }
+.deco-2 { top: 15%; right: 6%; animation-delay: 1.2s; font-size: 2.4rem; }
+.deco-3 { bottom: 18%; right: 4%; animation-delay: 0.6s; font-size: 2rem; }
+.deco-4 { bottom: 12%; left: 10%; animation-delay: 2s; }
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-6deg) scale(1); }
+  50%       { transform: rotate(6deg)  scale(1.08); }
+}
+
+.header-content { position: relative; z-index: 1; }
+
+.eyebrow {
+  font-size: .85rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--green-pale);
+  margin-bottom: 14px;
+}
+
+.site-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3.5rem, 12vw, 7rem);
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 3px 24px rgba(0,0,0,.35);
+  margin-bottom: 12px;
+}
+
+.tagline {
+  font-size: 1.05rem;
+  color: var(--green-pale);
+  margin-bottom: 28px;
+  letter-spacing: .02em;
+}
+
+.trip-badge {
+  display: inline-block;
+  padding: 9px 22px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: .88rem;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.25);
+  backdrop-filter: blur(6px);
+  letter-spacing: .03em;
+}
+
+.trip-badge.active {
+  background: rgba(82,183,136,.25);
+  border-color: var(--green-light);
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(82,183,136,.45); }
+  50%       { box-shadow: 0 0 0 10px rgba(82,183,136,0); }
+}
+
+/* ===================================================
+   OVERVIEW CARDS
+   =================================================== */
+
+.overview {
+  margin-top: -44px;
+  padding-bottom: 8px;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.overview-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px 14px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.ov-icon  { font-size: 1.6rem; margin-bottom: 2px; }
+.ov-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.ov-value { font-weight: 700; font-size: .92rem; color: var(--text); }
+
+/* ===================================================
+   PROGRESS BAR
+   =================================================== */
+
+.progress-section {
+  padding: 24px 0 8px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 10px;
+  background: #d8f3dc;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-light), var(--yellow));
+  border-radius: 100px;
+  transition: width 1.2s ease;
+}
+
+/* ===================================================
+   ITINERARY TIMELINE
+   =================================================== */
+
+.itinerary {
+  padding: 40px 0 64px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--green-dark);
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* The vertical line */
+.timeline {
+  position: relative;
+  padding-left: 48px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--green-light), var(--green-pale) 80%, transparent);
+  border-radius: 100px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 28px;
+}
+
+/* Dot on the timeline */
+.timeline-dot {
+  position: absolute;
+  left: -36px;
+  top: 18px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  z-index: 1;
+}
+
+.timeline-dot.pulse {
+  animation: dot-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.35); }
+}
+
+/* ===== DAY CARDS ===== */
+
+.day-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--green-pale);
+  transition: transform .2s, box-shadow .2s;
+}
+
+.day-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.timeline-item.visited .day-card  { border-left-color: var(--green-light); }
+.timeline-item.current .day-card  { border-left-color: var(--yellow); background: #fffcf5; }
+.timeline-item.upcoming .day-card { border-left-color: var(--green-pale); opacity: .82; }
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.day-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.day-num {
+  font-weight: 700;
+  font-size: .84rem;
+  color: var(--green-mid);
+}
+
+.day-date {
+  font-size: .78rem;
+  color: var(--muted);
+  background: var(--green-bg);
+  padding: 2px 9px;
+  border-radius: 100px;
+}
+
+/* Status tags */
+.status-tag {
+  flex-shrink: 0;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+.status-tag.visited  { background: #d8f3dc; color: var(--green-mid); }
+.status-tag.upcoming { background: #f0f0f0; color: #888; }
+.status-tag.current  {
+  background: #fff0d6;
+  color: #b45309;
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+.location {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-bottom: 8px;
+}
+
+.desc {
+  font-size: .93rem;
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+/* Highlight chips */
+.highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.highlights span {
+  font-size: .76rem;
+  font-weight: 600;
+  padding: 4px 11px;
+  background: #eaf4ee;
+  color: var(--green-mid);
+  border-radius: 100px;
+  border: 1px solid #c7e6d3;
+}
+
+/* Photo grid */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.photo-grid img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+
+.photo-placeholder {
+  grid-column: 1 / -1;
+  background: var(--green-bg);
+  border: 2px dashed var(--green-pale);
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+  font-size: .84rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.photo-placeholder.upload-hint {
+  border-color: #f4d090;
+  background: #fffbf0;
+  color: #b45309;
+}
+
+.photo-placeholder small {
+  display: block;
+  margin-top: 4px;
+  font-size: .75rem;
+  opacity: .8;
+}
+
+/* ===================================================
+   COMMENTS (utterances)
+   =================================================== */
+
+.comments-section {
+  background: var(--white);
+  border-top: 2px solid var(--green-pale);
+  padding: 60px 0 72px;
+}
+
+.comments-section .section-title {
+  margin-bottom: 10px;
+}
+
+.comments-note {
+  text-align: center;
+  color: var(--muted);
+  font-size: .9rem;
+  margin-bottom: 36px;
+}
+
+/* ===================================================
+   FOOTER
+   =================================================== */
+
+footer {
+  background: var(--green-dark);
+  color: var(--green-pale);
+  text-align: center;
+  padding: 24px 20px;
+  font-size: .84rem;
+}
+
+footer a {
+  color: var(--green-light);
+  text-decoration: none;
+}
+footer a:hover { text-decoration: underline; }
+
+/* ===================================================
+   RESPONSIVE
+   =================================================== */
+
+@media (max-width: 580px) {
+  .overview-grid { gap: 8px; }
+  .overview-card { padding: 14px 10px; }
+  .ov-value { font-size: .84rem; }
+
+  .timeline { padding-left: 36px; }
+  .timeline::before { left: 14px; }
+  .timeline-dot { left: -28px; font-size: .95rem; }
+
+  .day-card { padding: 18px 16px; }
+  .day-header { flex-direction: column; }
+  .location { font-size: 1.25rem; }
+
+  .section-title { font-size: 1.6rem; }
+}
