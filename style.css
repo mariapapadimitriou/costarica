@@ -1,63 +1,90 @@
 /* ===================================================
-   PURA VIDA — Costa Rica Itinerary Page
+   PURA VIDA — Costa Rica Travel Journal
+   Vintage postcard / tropical journal aesthetic
    =================================================== */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --green-dark:  #1b4332;
-  --green-mid:   #2d6a4f;
-  --green:       #40916c;
-  --green-light: #52b788;
-  --green-pale:  #b7e4c7;
-  --green-bg:    #f0f7f0;
-  --yellow:      #f4a261;
-  --orange:      #e76f51;
-  --white:       #ffffff;
-  --text:        #1b4332;
-  --muted:       #4a7c59;
-  --shadow:      0 4px 20px rgba(27,67,50,.12);
-  --shadow-lg:   0 8px 32px rgba(27,67,50,.18);
-  --radius:      16px;
+  --jungle:      #1a5c2e;
+  --jungle-dark: #0f3a1a;
+  --jungle-mid:  #2d7a3e;
+  --canopy:      #3a8f4f;
+  --leaf:        #52b788;
+  --leaf-pale:   #b7e4c7;
+  --sand:        #f5e6c8;
+  --sand-light:  #faf3e6;
+  --parchment:   #fdf8ef;
+  --postcard-bg: #f9f1e1;
+  --sunset:      #e8753a;
+  --amber:       #f4a261;
+  --sky:         #3b8dd4;
+  --sky-light:   #a8d4f0;
+  --red:         #c93838;
+  --red-light:   #e86b5a;
+  --cream:       #fffef9;
+  --brown:       #6b4423;
+  --brown-light: #8b6543;
+  --text:        #2c1810;
+  --text-muted:  #6b5b4f;
+  --stamp-border:#8b4513;
+  --shadow:      0 4px 20px rgba(44,24,16,.1);
+  --shadow-lg:   0 8px 32px rgba(44,24,16,.16);
+  --radius:      12px;
 }
 
-html {
-  /* prevent horizontal overflow on mobile */
-  overflow-x: hidden;
-}
+html { overflow-x: hidden; }
 
 body {
   font-family: 'Inter', sans-serif;
-  background: var(--green-bg);
+  background: var(--postcard-bg);
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
-  /* respect notch / home bar on iOS */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(139,99,67,.03) 28px, rgba(139,99,67,.03) 29px),
+    repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(139,99,67,.02) 28px, rgba(139,99,67,.02) 29px);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .container {
-  max-width: 760px;
+  max-width: 780px;
   margin: 0 auto;
   padding: 0 20px;
-  /* respect side notches */
   padding-left:  max(20px, env(safe-area-inset-left));
   padding-right: max(20px, env(safe-area-inset-right));
+  position: relative;
+  z-index: 1;
 }
 
 /* ===================================================
-   HEADER
+   HEADER — "Greetings from" postcard style
    =================================================== */
 
 .site-header {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(150deg, #0d2b1d 0%, var(--green-dark) 40%, var(--green-mid) 80%, var(--green) 100%);
-  padding: 64px 20px 88px;
-  /* respect top notch */
-  padding-top: max(64px, calc(44px + env(safe-area-inset-top)));
+  background:
+    linear-gradient(175deg,
+      #0c2e15 0%,
+      #143d20 20%,
+      #1a5c2e 45%,
+      #2d7a3e 70%,
+      #3a8f4f 90%,
+      #52b788 100%);
+  padding: 56px 20px 100px;
+  padding-top: max(56px, calc(44px + env(safe-area-inset-top)));
   text-align: center;
   color: #fff;
+  border-bottom: 6px solid var(--brown);
 }
 
 .site-header::before {
@@ -65,8 +92,20 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(82,183,136,.15) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(72,202,228,.1)  0%, transparent 50%);
+    radial-gradient(ellipse at 15% 80%, rgba(82,183,136,.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 20%, rgba(59,141,212,.12) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 0%, rgba(244,162,97,.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.site-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to top, rgba(0,0,0,.15), transparent);
   pointer-events: none;
 }
 
@@ -78,48 +117,74 @@ body {
 
 .deco {
   position: absolute;
-  font-size: 3rem;
-  opacity: .18;
-  animation: sway 5s ease-in-out infinite;
-  /* keep decorations from causing scroll */
-  max-width: 3rem;
+  font-size: 3.5rem;
+  opacity: .15;
+  animation: sway 6s ease-in-out infinite;
+  max-width: 3.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
 }
-.deco-1 { top: 8%;  left: 4%;  animation-delay: 0s; }
-.deco-2 { top: 15%; right: 6%; animation-delay: 1.2s; font-size: 2.4rem; }
-.deco-3 { bottom: 18%; right: 4%; animation-delay: 0.6s; font-size: 2rem; }
-.deco-4 { bottom: 12%; left: 10%; animation-delay: 2s; }
+.deco-1 { top: 6%;  left: 3%;  animation-delay: 0s; }
+.deco-2 { top: 12%; right: 5%; animation-delay: 1.5s; font-size: 2.8rem; }
+.deco-3 { bottom: 22%; right: 3%; animation-delay: 0.8s; font-size: 2.4rem; }
+.deco-4 { bottom: 15%; left: 8%; animation-delay: 2.2s; }
 
 @keyframes sway {
-  0%, 100% { transform: rotate(-6deg) scale(1); }
-  50%       { transform: rotate(6deg)  scale(1.08); }
+  0%, 100% { transform: rotate(-8deg) scale(1); }
+  50%       { transform: rotate(8deg)  scale(1.1); }
 }
 
 .header-content { position: relative; z-index: 1; }
 
 .eyebrow {
-  font-size: .85rem;
+  font-size: .82rem;
   font-weight: 600;
-  letter-spacing: .12em;
+  letter-spacing: .14em;
   text-transform: uppercase;
-  color: var(--green-pale);
-  margin-bottom: 14px;
+  color: var(--sand);
+  margin-bottom: 12px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.4);
+}
+
+.greetings-from {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  color: var(--amber);
+  letter-spacing: .04em;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 8px rgba(0,0,0,.3);
 }
 
 .site-header h1 {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(3rem, 14vw, 7rem);
+  font-size: clamp(2.8rem, 13vw, 6.5rem);
   font-weight: 900;
-  line-height: 1;
+  line-height: .95;
   color: #fff;
-  text-shadow: 0 3px 24px rgba(0,0,0,.35);
-  margin-bottom: 12px;
+  text-shadow:
+    3px 3px 0 var(--sunset),
+    6px 6px 0 rgba(0,0,0,.15),
+    0 4px 24px rgba(0,0,0,.4);
+  margin-bottom: 8px;
+  letter-spacing: .02em;
+}
+
+.site-header h1 span {
+  display: block;
+  background: linear-gradient(180deg, #fff 30%, var(--sand) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(3px 3px 0 var(--sunset)) drop-shadow(0 4px 16px rgba(0,0,0,.3));
 }
 
 .tagline {
-  font-size: 1.05rem;
-  color: var(--green-pale);
-  margin-bottom: 28px;
-  letter-spacing: .02em;
+  font-size: 1rem;
+  color: var(--leaf-pale);
+  margin-bottom: 24px;
+  letter-spacing: .03em;
+  text-shadow: 0 1px 4px rgba(0,0,0,.3);
 }
 
 .trip-badge {
@@ -127,30 +192,27 @@ body {
   padding: 10px 24px;
   border-radius: 100px;
   font-weight: 600;
-  font-size: .88rem;
-  border: 1px solid rgba(255,255,255,.25);
+  font-size: .85rem;
+  border: 2px solid rgba(255,255,255,.3);
   backdrop-filter: blur(6px);
   letter-spacing: .03em;
-  /* min touch target */
   min-height: 44px;
   line-height: 24px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.2);
 }
 
-/* departing = pre-trip amber */
 .trip-badge.departing {
-  background: rgba(244,162,97,.25);
-  border-color: var(--yellow);
+  background: rgba(244,162,97,.3);
+  border-color: var(--amber);
   animation: glow-amber 2.5s ease-in-out infinite;
 }
 
-/* active = currently traveling green */
 .trip-badge.active {
-  background: rgba(82,183,136,.25);
-  border-color: var(--green-light);
+  background: rgba(82,183,136,.3);
+  border-color: var(--leaf);
   animation: glow-green 2.5s ease-in-out infinite;
 }
 
-/* done = soft white, no pulse */
 .trip-badge.done {
   background: rgba(255,255,255,.15);
   border-color: rgba(255,255,255,.3);
@@ -167,12 +229,49 @@ body {
 }
 
 /* ===================================================
-   OVERVIEW CARDS
+   STAMP DECORATION
+   =================================================== */
+
+.postcard-stamp {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  width: 72px;
+  height: 88px;
+  border: 3px dashed rgba(255,255,255,.2);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(4deg);
+  background: rgba(255,255,255,.06);
+  z-index: 2;
+}
+
+.postcard-stamp .stamp-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.3));
+}
+
+.postcard-stamp .stamp-text {
+  font-size: .5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: rgba(255,255,255,.5);
+  margin-top: 4px;
+}
+
+/* ===================================================
+   OVERVIEW CARDS — wooden sign style
    =================================================== */
 
 .overview {
-  margin-top: -44px;
+  margin-top: -48px;
   padding-bottom: 8px;
+  position: relative;
+  z-index: 2;
 }
 
 .overview-grid {
@@ -182,27 +281,38 @@ body {
 }
 
 .overview-card {
-  background: var(--white);
+  background: linear-gradient(135deg, var(--sand-light) 0%, var(--sand) 100%);
   border-radius: var(--radius);
-  padding: 18px 12px;
+  padding: 20px 14px;
   text-align: center;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.6);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  border: 1px solid rgba(139,99,67,.15);
+  position: relative;
 }
 
-.ov-icon  { font-size: 1.5rem; margin-bottom: 2px; }
-.ov-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
-.ov-value { font-weight: 700; font-size: .88rem; color: var(--text); }
+.overview-card::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed rgba(139,99,67,.12);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.ov-icon  { font-size: 1.5rem; margin-bottom: 4px; }
+.ov-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--brown-light); font-weight: 600; }
+.ov-value { font-weight: 700; font-size: .9rem; color: var(--text); font-family: 'Playfair Display', serif; }
 
 /* ===================================================
-   PROGRESS BAR
+   PROGRESS BAR — rope / vine style
    =================================================== */
 
 .progress-section {
-  padding: 24px 0 8px;
+  padding: 28px 0 12px;
 }
 
 .progress-label {
@@ -210,24 +320,26 @@ body {
   justify-content: space-between;
   font-size: .82rem;
   font-weight: 600;
-  color: var(--muted);
-  margin-bottom: 8px;
+  color: var(--brown-light);
+  margin-bottom: 10px;
 }
 
 .progress-bar {
-  height: 10px;
-  background: #d8f3dc;
+  height: 12px;
+  background: var(--sand);
   border-radius: 100px;
   overflow: hidden;
+  border: 1px solid rgba(139,99,67,.15);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.08);
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--green-light), var(--yellow));
+  background: linear-gradient(90deg, var(--jungle-mid), var(--leaf), var(--amber));
   border-radius: 100px;
   transition: width 1.2s ease;
-  /* show a sliver even at 0% so bar doesn't look broken */
   min-width: 4px;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.1), 0 0 6px rgba(82,183,136,.3);
 }
 
 /* ===================================================
@@ -240,45 +352,60 @@ body {
 
 .section-title {
   font-family: 'Playfair Display', serif;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: var(--green-dark);
+  color: var(--jungle-dark);
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 44px;
+  position: relative;
+}
+
+.section-title::after {
+  content: '✦';
+  display: block;
+  font-size: .9rem;
+  color: var(--amber);
+  margin-top: 8px;
+  letter-spacing: 12px;
 }
 
 .timeline {
   position: relative;
-  padding-left: 48px;
+  padding-left: 52px;
 }
 
 .timeline::before {
   content: '';
   position: absolute;
-  left: 18px;
+  left: 20px;
   top: 0;
   bottom: 0;
   width: 3px;
-  background: linear-gradient(to bottom, var(--green-light), var(--green-pale) 80%, transparent);
+  background: linear-gradient(to bottom,
+    var(--leaf) 0%,
+    var(--amber) 50%,
+    var(--leaf-pale) 80%,
+    transparent 100%);
   border-radius: 100px;
 }
 
 .timeline-item {
   position: relative;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .timeline-dot {
   position: absolute;
-  left: -36px;
-  top: 16px;
-  width: 36px;
-  height: 36px;
+  left: -40px;
+  top: 18px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   z-index: 1;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.15));
 }
 
 .timeline-dot.pulse {
@@ -290,18 +417,31 @@ body {
   50%       { transform: scale(1.35); }
 }
 
-/* ===== DAY CARDS ===== */
+/* ===== DAY CARDS — postcard style ===== */
 
 .day-card {
-  background: var(--white);
+  background: var(--cream);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 28px;
   box-shadow: var(--shadow);
-  border-left: 4px solid var(--green-pale);
+  border-left: 5px solid var(--leaf-pale);
   transition: transform .2s, box-shadow .2s;
+  position: relative;
+  border-top: 1px solid rgba(139,99,67,.08);
 }
 
-/* only show hover lift on devices that support hover (not touch) */
+.day-card::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  bottom: 8px;
+  left: calc(8px + 5px);
+  border: 1px dashed rgba(139,99,67,.08);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
 @media (hover: hover) {
   .day-card:hover {
     transform: translateY(-3px);
@@ -309,15 +449,15 @@ body {
   }
 }
 
-.timeline-item.visited .day-card  { border-left-color: var(--green-light); }
-.timeline-item.current .day-card  { border-left-color: var(--yellow); background: #fffcf5; }
-.timeline-item.upcoming .day-card { border-left-color: var(--green-pale); opacity: .82; }
+.timeline-item.visited .day-card  { border-left-color: var(--leaf); background: var(--cream); }
+.timeline-item.current .day-card  { border-left-color: var(--amber); background: #fffcf2; }
+.timeline-item.upcoming .day-card { border-left-color: var(--leaf-pale); opacity: .85; }
 
 .day-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   gap: 8px;
 }
 
@@ -331,103 +471,196 @@ body {
 .day-num {
   font-weight: 700;
   font-size: .84rem;
-  color: var(--green-mid);
+  color: var(--brown);
+  font-family: 'Playfair Display', serif;
+  letter-spacing: .02em;
 }
 
-/* Status tags */
+/* Status tags — passport stamp look */
 .status-tag {
   flex-shrink: 0;
-  font-size: .72rem;
+  font-size: .7rem;
   font-weight: 700;
-  padding: 5px 12px;
-  border-radius: 100px;
+  padding: 5px 14px;
+  border-radius: 4px;
   text-transform: uppercase;
-  letter-spacing: .05em;
+  letter-spacing: .08em;
   white-space: nowrap;
-  /* min touch target height */
   min-height: 28px;
   display: inline-flex;
   align-items: center;
+  border: 2px solid transparent;
 }
 
-.status-tag.visited  { background: #d8f3dc; color: var(--green-mid); }
-.status-tag.upcoming { background: #f0f0f0; color: #888; }
+.status-tag.visited  {
+  background: transparent;
+  color: var(--jungle-mid);
+  border-color: var(--jungle-mid);
+  border-style: dashed;
+  transform: rotate(-2deg);
+}
+
+.status-tag.upcoming {
+  background: var(--sand);
+  color: var(--brown-light);
+  border-color: rgba(139,99,67,.2);
+}
+
 .status-tag.current  {
-  background: #fff0d6;
-  color: #b45309;
+  background: transparent;
+  color: var(--sunset);
+  border-color: var(--sunset);
+  border-style: solid;
+  transform: rotate(2deg);
   animation: glow-amber 2.5s ease-in-out infinite;
 }
 
 .location {
   font-family: 'Playfair Display', serif;
-  font-size: 1.45rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: var(--green-dark);
-  margin-bottom: 8px;
-  /* prevent very long names breaking layout */
+  color: var(--jungle-dark);
+  margin-bottom: 10px;
   overflow-wrap: break-word;
 }
 
 .desc {
   font-size: .93rem;
-  color: var(--muted);
-  line-height: 1.75;
+  color: var(--text-muted);
+  line-height: 1.8;
   margin-bottom: 16px;
 }
 
-/* Highlight chips */
+/* Highlight chips — tropical tag style */
 .highlights {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .highlights span {
-  font-size: .76rem;
+  font-size: .74rem;
   font-weight: 600;
-  padding: 5px 11px;
-  background: #eaf4ee;
-  color: var(--green-mid);
+  padding: 5px 12px;
+  background: linear-gradient(135deg, #eaf4ee, #d4edda);
+  color: var(--jungle);
   border-radius: 100px;
-  border: 1px solid #c7e6d3;
-  /* comfortable touch targets */
+  border: 1px solid rgba(26,92,46,.15);
   min-height: 28px;
   display: inline-flex;
   align-items: center;
 }
 
-/* Photo grid */
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
+/* ===================================================
+   PHOTO CAROUSEL — replaces old grid
+   =================================================== */
+
+.photo-carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--sand);
+  border: 1px solid rgba(139,99,67,.12);
 }
 
-.photo-grid img {
+.carousel-track {
+  display: flex;
+  transition: transform 0.4s ease;
+  will-change: transform;
+}
+
+.carousel-track img {
   width: 100%;
-  aspect-ratio: 4/3;
+  flex-shrink: 0;
+  aspect-ratio: 16/10;
   object-fit: cover;
-  border-radius: 10px;
   display: block;
 }
 
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.85);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: background .2s, transform .15s;
+  backdrop-filter: blur(4px);
+}
+
+.carousel-btn:hover {
+  background: #fff;
+  transform: translateY(-50%) scale(1.08);
+}
+
+.carousel-btn.prev { left: 8px; }
+.carousel-btn.next { right: 8px; }
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+  background: var(--sand);
+}
+
+.carousel-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(139,99,67,.2);
+  border: none;
+  cursor: pointer;
+  transition: background .2s, transform .2s;
+  padding: 0;
+}
+
+.carousel-dots .dot.active {
+  background: var(--sunset);
+  transform: scale(1.25);
+}
+
+.carousel-count {
+  position: absolute;
+  bottom: 44px;
+  right: 10px;
+  background: rgba(0,0,0,.5);
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 100px;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+/* Original placeholder kept for empty folders */
 .photo-placeholder {
-  grid-column: 1 / -1;
-  background: var(--green-bg);
-  border: 2px dashed var(--green-pale);
+  background: var(--sand-light);
+  border: 2px dashed rgba(139,99,67,.2);
   border-radius: 10px;
-  padding: 18px;
+  padding: 24px;
   text-align: center;
   font-size: .84rem;
-  color: var(--muted);
+  color: var(--text-muted);
   line-height: 1.6;
 }
 
 .photo-placeholder.upload-hint {
-  border-color: #f4d090;
+  border-color: var(--amber);
   background: #fffbf0;
-  color: #b45309;
+  color: var(--brown);
 }
 
 .photo-placeholder small {
@@ -438,20 +671,55 @@ body {
 }
 
 /* ===================================================
-   FOOTER
+   HOW-TO SECTION
+   =================================================== */
+
+.how-to-upload {
+  margin-top: 8px;
+  padding: 12px 16px;
+  background: rgba(244,162,97,.06);
+  border: 1px dashed rgba(244,162,97,.25);
+  border-radius: 8px;
+  font-size: .78rem;
+  color: var(--brown-light);
+  line-height: 1.6;
+}
+
+.how-to-upload code {
+  background: rgba(139,99,67,.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: .75rem;
+  font-family: 'Courier New', monospace;
+  color: var(--brown);
+}
+
+/* ===================================================
+   FOOTER — weathered postcard edge
    =================================================== */
 
 footer {
-  background: var(--green-dark);
-  color: var(--green-pale);
+  background: var(--jungle-dark);
+  color: var(--leaf-pale);
   text-align: center;
-  padding: 24px 20px;
-  padding-bottom: max(24px, calc(16px + env(safe-area-inset-bottom)));
+  padding: 28px 20px;
+  padding-bottom: max(28px, calc(16px + env(safe-area-inset-bottom)));
   font-size: .84rem;
+  border-top: 4px solid var(--brown);
+  position: relative;
+}
+
+footer::before {
+  content: '🌴 🦜 🌺 🦥 🌿';
+  display: block;
+  font-size: .9rem;
+  letter-spacing: 8px;
+  margin-bottom: 12px;
+  opacity: .3;
 }
 
 footer a {
-  color: var(--green-light);
+  color: var(--leaf);
   text-decoration: none;
 }
 footer a:hover { text-decoration: underline; }
@@ -461,32 +729,31 @@ footer a:hover { text-decoration: underline; }
    =================================================== */
 
 @media (max-width: 480px) {
-  /* Header */
   .site-header { padding-left: 16px; padding-right: 16px; }
-  .tagline { font-size: .95rem; }
+  .tagline { font-size: .92rem; }
 
-  /* Overview: stack to single column on very small screens */
+  .postcard-stamp { width: 56px; height: 68px; top: 12px; right: 12px; }
+  .postcard-stamp .stamp-icon { font-size: 1.5rem; }
+  .postcard-stamp .stamp-text { font-size: .42rem; }
+
   .overview-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .overview-card { padding: 12px 8px; }
+  .overview-card { padding: 14px 8px; }
   .ov-icon  { font-size: 1.2rem; }
   .ov-label { font-size: .62rem; }
-  .ov-value { font-size: .8rem; }
+  .ov-value { font-size: .82rem; }
 
-  /* Timeline */
-  .timeline { padding-left: 34px; }
-  .timeline::before { left: 12px; }
-  .timeline-dot { left: -26px; width: 28px; height: 28px; font-size: .9rem; }
+  .timeline { padding-left: 38px; }
+  .timeline::before { left: 14px; }
+  .timeline-dot { left: -30px; width: 32px; height: 32px; font-size: 1rem; }
 
-  /* Cards */
-  .day-card { padding: 16px 14px; border-radius: 12px; }
+  .day-card { padding: 18px 14px; border-radius: 10px; }
+  .day-card::before { display: none; }
   .day-header { flex-direction: column; gap: 6px; }
-  .location { font-size: 1.2rem; }
+  .location { font-size: 1.25rem; }
   .desc { font-size: .88rem; }
 
-  /* Photo grid: 2 columns on phone */
-  .photo-grid { grid-template-columns: repeat(2, 1fr); }
-
-  /* Typography */
-  .section-title { font-size: 1.6rem; margin-bottom: 28px; }
+  .section-title { font-size: 1.7rem; margin-bottom: 28px; }
   .progress-label { font-size: .78rem; }
+
+  .carousel-btn { width: 30px; height: 30px; font-size: .9rem; }
 }

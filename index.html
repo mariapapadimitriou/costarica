@@ -16,12 +16,17 @@
     <span class="deco deco-1">🌿</span>
     <span class="deco deco-2">🌺</span>
     <span class="deco deco-3">🦜</span>
-    <span class="deco deco-4">🌿</span>
+    <span class="deco deco-4">🦥</span>
+  </div>
+  <div class="postcard-stamp">
+    <span class="stamp-icon">🦋</span>
+    <span class="stamp-text">Costa Rica</span>
   </div>
   <div class="header-content">
     <p class="eyebrow">📍 Toronto &rarr; San Jos&eacute;</p>
-    <h1>Pura Vida!</h1>
-    <p class="tagline">Maria's Costa Rica Adventure &middot; 2026</p>
+    <p class="greetings-from">Greetings from</p>
+    <h1><span>Costa Rica!</span></h1>
+    <p class="tagline">Maria's Adventure Journal &middot; 2026</p>
     <!-- STATUS OPTIONS: class="trip-badge departing" / "active" / "done" -->
     <div class="trip-badge departing">✈️ Departing Soon</div>
   </div>
@@ -94,9 +99,12 @@
               <span>Barrio Amón</span>
               <span>Gallo Pinto</span>
             </div>
-            <!-- PHOTOS: swap placeholder with <img src="images/sanjose-1.jpg" alt="..."> -->
-            <div class="photo-grid">
-              <div class="photo-placeholder">📸 Photos coming soon</div>
+            <!-- CAROUSEL: auto-populated from images/san-jose/ -->
+            <div class="photo-carousel" data-folder="san-jose">
+              <div class="carousel-track"></div>
+              <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
+              <button class="carousel-btn next" aria-label="Next">&#8250;</button>
+              <div class="carousel-dots"></div>
             </div>
           </div>
         </div>
@@ -118,8 +126,12 @@
               <span>Fresh Seafood</span>
               <span>Local Life</span>
             </div>
-            <div class="photo-grid">
-              <div class="photo-placeholder">📸 Stay tuned!</div>
+            <!-- CAROUSEL: auto-populated from images/coup-san-juan/ -->
+            <div class="photo-carousel" data-folder="coup-san-juan">
+              <div class="carousel-track"></div>
+              <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
+              <button class="carousel-btn next" aria-label="Next">&#8250;</button>
+              <div class="carousel-dots"></div>
             </div>
           </div>
         </div>
@@ -142,8 +154,12 @@
               <span>Hot Springs</span>
               <span>Hanging Bridges</span>
             </div>
-            <div class="photo-grid">
-              <div class="photo-placeholder">📸 Stay tuned!</div>
+            <!-- CAROUSEL: auto-populated from images/la-fortuna/ -->
+            <div class="photo-carousel" data-folder="la-fortuna">
+              <div class="carousel-track"></div>
+              <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
+              <button class="carousel-btn next" aria-label="Next">&#8250;</button>
+              <div class="carousel-dots"></div>
             </div>
           </div>
         </div>
@@ -166,8 +182,12 @@
               <span>Quetzal Watching</span>
               <span>Sky Walk</span>
             </div>
-            <div class="photo-grid">
-              <div class="photo-placeholder">📸 Stay tuned!</div>
+            <!-- CAROUSEL: auto-populated from images/monteverde/ -->
+            <div class="photo-carousel" data-folder="monteverde">
+              <div class="carousel-track"></div>
+              <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
+              <button class="carousel-btn next" aria-label="Next">&#8250;</button>
+              <div class="carousel-dots"></div>
             </div>
           </div>
         </div>
@@ -190,8 +210,12 @@
               <span>Nicoya Peninsula</span>
               <span>Jungle Yoga</span>
             </div>
-            <div class="photo-grid">
-              <div class="photo-placeholder">📸 Stay tuned!</div>
+            <!-- CAROUSEL: auto-populated from images/santa-teresa/ -->
+            <div class="photo-carousel" data-folder="santa-teresa">
+              <div class="carousel-track"></div>
+              <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
+              <button class="carousel-btn next" aria-label="Next">&#8250;</button>
+              <div class="carousel-dots"></div>
             </div>
           </div>
         </div>
@@ -208,5 +232,6 @@
   </div>
 </footer>
 
+<script src="carousel.js"></script>
 </body>
 </html>
