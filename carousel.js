@@ -274,6 +274,16 @@
     }
   }
 
+  /* ======= STOPS SCHEDULE ======= */
+
+  const STOPS = [
+    { folder: 'san-jose',      name: 'San José',      emoji: '🏙️', startDay: 1,  endDay: 1  },
+    { folder: 'coup-san-juan', name: 'Coop San Juan',  emoji: '🌊', startDay: 2,  endDay: 2  },
+    { folder: 'la-fortuna',    name: 'La Fortuna',     emoji: '🌋', startDay: 3,  endDay: 4  },
+    { folder: 'monteverde',    name: 'Monteverde',     emoji: '☁️', startDay: 5,  endDay: 6  },
+    { folder: 'santa-teresa',  name: 'Santa Teresa',   emoji: '🏄', startDay: 7,  endDay: 10 },
+  ];
+
   /* ======= DAY COUNTER ======= */
 
   function setupDayCounter() {
@@ -282,7 +292,7 @@
 
     const tripStart = new Date(2026, 2, 26); // Mar 26, 2026
     const tripEnd   = new Date(2026, 3, 5);  // Apr 5, 2026
-    const totalDays = 11;
+    const totalDays = 10;
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
@@ -293,22 +303,83 @@
     const progressFill = document.querySelector('.progress-fill');
     const progressLabel = document.querySelector('.progress-label');
 
+    let dayNum = 0;
+
     if (nowMs < startMs) {
       const daysUntil = Math.ceil((startMs - nowMs) / 86400000);
       el.textContent = daysUntil === 1 ? 'Tomorrow!' : `${daysUntil} days to go!`;
       if (progressFill) progressFill.style.width = '0%';
       if (progressLabel) progressLabel.lastElementChild.textContent = 'Not started yet!';
     } else if (nowMs > endMs) {
+      dayNum = totalDays + 1;
       el.innerHTML = 'Trip complete! 🎉';
       if (progressFill) progressFill.style.width = '100%';
       if (progressLabel) progressLabel.lastElementChild.textContent = 'Done!';
     } else {
-      const dayNum = Math.floor((nowMs - startMs) / 86400000) + 1;
+      dayNum = Math.floor((nowMs - startMs) / 86400000) + 1;
       el.innerHTML = `Day ${dayNum}<span class="day-counter-sub"> / ${totalDays}</span>`;
       const pct = Math.round((dayNum / totalDays) * 100);
       if (progressFill) progressFill.style.width = pct + '%';
       if (progressLabel) progressLabel.lastElementChild.textContent = `Day ${dayNum} of ${totalDays}`;
     }
+
+    updateTripBadge(dayNum, totalDays);
+    updateCardStatuses(dayNum);
+  }
+
+  /* ======= DYNAMIC BADGE ======= */
+
+  function updateTripBadge(dayNum, totalDays) {
+    const badge = document.getElementById('trip-badge');
+    if (!badge) return;
+
+    if (dayNum === 0) {
+      badge.className = 'trip-badge departing';
+      badge.textContent = '✈️ Departing Soon';
+      return;
+    }
+
+    if (dayNum > totalDays) {
+      badge.className = 'trip-badge done';
+      badge.textContent = '🎉 Trip Complete';
+      return;
+    }
+
+    const current = STOPS.find(s => dayNum >= s.startDay && dayNum <= s.endDay);
+    if (current) {
+      badge.className = 'trip-badge active';
+      badge.textContent = `${current.emoji} Currently in ${current.name}`;
+    }
+  }
+
+  /* ======= DYNAMIC CARD STATUSES ======= */
+
+  function updateCardStatuses(dayNum) {
+    const cards = document.querySelectorAll('.timeline-item');
+    cards.forEach((item, i) => {
+      if (i >= STOPS.length) return;
+      const stop = STOPS[i];
+      const tag = item.querySelector('.status-tag');
+      if (!tag) return;
+
+      if (dayNum === 0) {
+        tag.className = 'status-tag upcoming';
+        tag.textContent = 'Upcoming';
+        item.className = 'timeline-item upcoming';
+      } else if (dayNum > stop.endDay) {
+        tag.className = 'status-tag visited';
+        tag.textContent = 'Visited';
+        item.className = 'timeline-item visited';
+      } else if (dayNum >= stop.startDay && dayNum <= stop.endDay) {
+        tag.className = 'status-tag current';
+        tag.textContent = '📍 Now';
+        item.className = 'timeline-item current';
+      } else {
+        tag.className = 'status-tag upcoming';
+        tag.textContent = 'Upcoming';
+        item.className = 'timeline-item upcoming';
+      }
+    });
   }
 
   /* ======= INIT ======= */
