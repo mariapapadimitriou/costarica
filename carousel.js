@@ -2,6 +2,7 @@
  * Costa Rica Travel Journal — Interactive Engine
  *
  * - Auto-loading photo carousels (GitHub API + local fallback)
+ * - Embedded EXIF / XMP caption extraction (reads iPhone captions)
  * - "Stay tuned!" message when no photos yet
  * - Confetti on carousel nav & chip clicks
  * - Floating background emoji
@@ -13,10 +14,143 @@
   'use strict';
 
   const IMAGE_EXTENSIONS = /\.(jpe?g|png|webp|gif|avif)$/i;
+  const JPEG_EXTENSIONS  = /\.(jpe?g)$/i;
   const REPO = 'mariapapadimitriou/costarica';
   const BRANCH = 'main';
 
   const CONFETTI_COLORS = ['#e74c3c', '#e67e22', '#f39c12', '#f5b041', '#1abc9c', '#16a085', '#2980b9'];
+
+  /* ======= EMBEDDED CAPTION EXTRACTION (EXIF / XMP) ======= */
+
+  function readUTF8(buf, offset, length) {
+    var bytes = new Uint8Array(buf, offset, length);
+    var s = '';
+    for (var i = 0; i < bytes.length; i++) {
+      if (bytes[i] === 0) break;
+      s += String.fromCharCode(bytes[i]);
+    }
+    return s;
+  }
+
+  function extractEXIFCaption(arrayBuffer) {
+    var view = new DataView(arrayBuffer);
+    if (view.getUint16(0) !== 0xFFD8) return '';
+
+    var offset = 2;
+    while (offset < view.byteLength - 1) {
+      var marker = view.getUint16(offset);
+      if (marker === 0xFFDA) break;
+      if ((marker & 0xFF00) !== 0xFF00) break;
+      var segLen = view.getUint16(offset + 2);
+      if (marker === 0xFFE1) {
+        var caption = parseAPP1(arrayBuffer, offset + 4, segLen - 2);
+        if (caption) return caption;
+      }
+      offset += 2 + segLen;
+    }
+    return '';
+  }
+
+  function parseAPP1(buf, start, length) {
+    var view = new DataView(buf, start, length);
+    var header = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3));
+    if (header !== 'Exif') return '';
+    var tiffOffset = start + 6;
+    var tiffView = new DataView(buf, tiffOffset);
+    var bigEndian = tiffView.getUint16(0) === 0x4D4D;
+
+    function read16(o) { return bigEndian ? tiffView.getUint16(o) : tiffView.getUint16(o, true); }
+    function read32(o) { return bigEndian ? tiffView.getUint32(o) : tiffView.getUint32(o, true); }
+
+    function readIFDString(ifdOffset, targetTag) {
+      var count = read16(ifdOffset);
+      for (var i = 0; i < count; i++) {
+        var entryOff = ifdOffset + 2 + i * 12;
+        var tag = read16(entryOff);
+        if (tag !== targetTag) continue;
+        var type = read16(entryOff + 2);
+        var num = read32(entryOff + 4);
+        if (type === 2) {
+          var strOff = num > 4 ? read32(entryOff + 8) : entryOff + 8 - tiffOffset;
+          return readUTF8(buf, tiffOffset + strOff, num).trim();
+        }
+        if (type === 7 && targetTag === 0x9286) {
+          var dataOff = num > 4 ? read32(entryOff + 8) : entryOff + 8 - tiffOffset;
+          var raw = new Uint8Array(buf, tiffOffset + dataOff, num);
+          var charCode = String.fromCharCode(raw[0], raw[1], raw[2], raw[3], raw[4], raw[5], raw[6], raw[7]);
+          var text = '';
+          if (charCode === 'ASCII\x00\x00\x00' || charCode === '\x00\x00\x00\x00\x00\x00\x00\x00') {
+            for (var j = 8; j < raw.length; j++) {
+              if (raw[j] === 0) break;
+              text += String.fromCharCode(raw[j]);
+            }
+          }
+          return text.trim();
+        }
+      }
+      return '';
+    }
+
+    function findExifIFDOffset(ifd0Offset) {
+      var count = read16(ifd0Offset);
+      for (var i = 0; i < count; i++) {
+        var entryOff = ifd0Offset + 2 + i * 12;
+        if (read16(entryOff) === 0x8769) return read32(entryOff + 8);
+      }
+      return 0;
+    }
+
+    var ifd0Offset = read32(4);
+    var desc = readIFDString(ifd0Offset, 0x010E);
+    if (desc) return desc;
+
+    var exifOffset = findExifIFDOffset(ifd0Offset);
+    if (exifOffset) {
+      var userComment = readIFDString(exifOffset, 0x9286);
+      if (userComment) return userComment;
+    }
+
+    return '';
+  }
+
+  function extractXMPCaption(arrayBuffer) {
+    var view = new DataView(arrayBuffer);
+    if (view.getUint16(0) !== 0xFFD8) return '';
+    var offset = 2;
+    while (offset < view.byteLength - 1) {
+      var marker = view.getUint16(offset);
+      if (marker === 0xFFDA) break;
+      if ((marker & 0xFF00) !== 0xFF00) break;
+      var segLen = view.getUint16(offset + 2);
+      if (marker === 0xFFE1) {
+        var bytes = new Uint8Array(arrayBuffer, offset + 4, Math.min(29, segLen - 2));
+        var sig = '';
+        for (var i = 0; i < bytes.length; i++) sig += String.fromCharCode(bytes[i]);
+        if (sig.indexOf('http://ns.adobe.com/xap/1.0/') === 0) {
+          var xmpBytes = new Uint8Array(arrayBuffer, offset + 4 + 29, segLen - 2 - 29);
+          var xmp = '';
+          for (var j = 0; j < xmpBytes.length; j++) xmp += String.fromCharCode(xmpBytes[j]);
+          var m = xmp.match(/<dc:description[^>]*>[\s\S]*?<rdf:li[^>]*>([^<]+)<\/rdf:li>/);
+          if (m && m[1].trim()) return m[1].trim();
+        }
+      }
+      offset += 2 + segLen;
+    }
+    return '';
+  }
+
+  async function extractEmbeddedCaption(imageUrl) {
+    try {
+      var resp = await fetch(imageUrl);
+      if (!resp.ok) return '';
+      var buf = await resp.arrayBuffer();
+      var caption = extractEXIFCaption(buf);
+      if (!caption) caption = extractXMPCaption(buf);
+      return caption;
+    } catch (_) {
+      return '';
+    }
+  }
 
   /* ======= FLOATING EMOJI ======= */
 
@@ -278,7 +412,7 @@
 
   const STOPS = [
     { folder: 'san-jose',      name: 'San José',      emoji: '🏙️', startDay: 1,  endDay: 1  },
-    { folder: 'coup-san-juan', name: 'Coop San Juan',  emoji: '🌊', startDay: 2,  endDay: 2  },
+    { folder: 'coup-san-juan', name: 'Coop San Juan',  emoji: '🏡', startDay: 2,  endDay: 2  },
     { folder: 'la-fortuna',    name: 'La Fortuna',     emoji: '🌋', startDay: 3,  endDay: 4  },
     { folder: 'monteverde',    name: 'Monteverde',     emoji: '☁️', startDay: 5,  endDay: 6  },
     { folder: 'santa-teresa',  name: 'Santa Teresa',   emoji: '🏄', startDay: 7,  endDay: 10 },
@@ -405,6 +539,15 @@
       let captions = {};
       if (images.length) {
         try { captions = await fetchCaptions(folder); } catch (_) {}
+        var embeddedResults = await Promise.all(images.map(function (img) {
+          if (!JPEG_EXTENSIONS.test(img.name)) return Promise.resolve('');
+          return extractEmbeddedCaption(img.url);
+        }));
+        for (var i = 0; i < images.length; i++) {
+          if (!captions[images[i].name] && embeddedResults[i]) {
+            captions[images[i].name] = embeddedResults[i];
+          }
+        }
       }
       buildCarousel(el, images, captions);
     }
