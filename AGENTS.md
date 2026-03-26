@@ -27,9 +27,19 @@ Then open `http://localhost:8000` in a browser.
 Each location card has a `data-folder` attribute (e.g. `san-jose`). The `carousel.js` script:
 1. On GitHub Pages: fetches the file list via the GitHub Contents API
 2. Locally: probes for `photo-1.jpg`, `photo-2.jpg`, etc. or reads a `manifest.json`
-3. Builds a swipeable carousel with prev/next buttons and dot navigation
+3. Loads `captions.json` from the same folder (if it exists) to display captions
+4. Builds a swipeable carousel with prev/next buttons, dot navigation, and captions
 
 To add photos: upload `.jpg`/`.png`/`.webp` files to `images/<location>/` and push. The carousel updates automatically on next page load.
+
+To add captions: create a `captions.json` file in the same folder mapping filenames to caption text:
+```json
+{
+  "photo-1.jpg": "Exploring Mercado Central — best gallo pinto ever!",
+  "photo-2.jpg": "Golden hour at Barrio Amón"
+}
+```
+Images without a caption entry simply won't show a caption bar for that slide.
 
 ### Notes
 

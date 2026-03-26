@@ -128,13 +128,35 @@
     return location.hostname.endsWith('.github.io') || location.hostname.endsWith('.github.com');
   }
 
+  async function fetchCaptions(folder) {
+    const base = `images/${folder}`;
+    try {
+      const res = await fetch(`${base}/captions.json`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    if (isGitHubPages()) {
+      try {
+        const url = `https://api.github.com/repos/${REPO}/contents/images/${folder}/captions.json?ref=${BRANCH}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const file = await res.json();
+          if (file.download_url) {
+            const r2 = await fetch(file.download_url);
+            if (r2.ok) return await r2.json();
+          }
+        }
+      } catch (_) {}
+    }
+    return {};
+  }
+
   async function fetchFromGitHub(folder) {
     const url = `https://api.github.com/repos/${REPO}/contents/images/${folder}?ref=${BRANCH}`;
     const res = await fetch(url);
     if (!res.ok) return [];
     const files = await res.json();
     if (!Array.isArray(files)) return [];
-    return files.filter(f => IMAGE_EXTENSIONS.test(f.name)).sort((a, b) => a.name.localeCompare(b.name)).map(f => f.download_url);
+    return files.filter(f => IMAGE_EXTENSIONS.test(f.name)).sort((a, b) => a.name.localeCompare(b.name)).map(f => ({ url: f.download_url, name: f.name }));
   }
 
   async function fetchLocal(folder) {
@@ -143,25 +165,26 @@
       const res = await fetch(`${base}/manifest.json`);
       if (res.ok) {
         const names = await res.json();
-        if (Array.isArray(names)) return names.filter(n => IMAGE_EXTENSIONS.test(n)).map(n => `${base}/${n}`);
+        if (Array.isArray(names)) return names.filter(n => IMAGE_EXTENSIONS.test(n)).map(n => ({ url: `${base}/${n}`, name: n }));
       }
     } catch (_) {}
     const found = [];
     for (let i = 1; i <= 30; i++) {
       for (const ext of ['jpg', 'jpeg', 'png', 'webp']) {
+        const name = `photo-${i}.${ext}`;
         try {
-          const r = await fetch(`${base}/photo-${i}.${ext}`, { method: 'HEAD' });
-          if (r.ok) { found.push(`${base}/photo-${i}.${ext}`); break; }
+          const r = await fetch(`${base}/${name}`, { method: 'HEAD' });
+          if (r.ok) { found.push({ url: `${base}/${name}`, name }); break; }
         } catch (_) {}
       }
     }
     return found;
   }
 
-  function buildCarousel(el, urls) {
+  function buildCarousel(el, images, captions) {
     const folder = el.dataset.folder;
 
-    if (!urls.length) {
+    if (!images.length) {
       el.innerHTML =
         '<div class="photo-placeholder">' +
           '<span class="stay-tuned-icon">📸</span>' +
@@ -173,22 +196,35 @@
     const track = el.querySelector('.carousel-track');
     const dotsContainer = el.querySelector('.carousel-dots');
 
-    urls.forEach((url, i) => {
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = `${folder.replace(/-/g, ' ')} photo ${i + 1}`;
-      img.loading = i === 0 ? 'eager' : 'lazy';
-      track.appendChild(img);
+    const captionTexts = images.map(img => captions[img.name] || '');
+
+    images.forEach((img, i) => {
+      const imgEl = document.createElement('img');
+      imgEl.src = img.url;
+      imgEl.alt = captionTexts[i] || `${folder.replace(/-/g, ' ')} photo ${i + 1}`;
+      imgEl.loading = i === 0 ? 'eager' : 'lazy';
+      track.appendChild(imgEl);
     });
 
-    if (urls.length > 1) {
+    const hasAnyCaptions = captionTexts.some(c => c);
+
+    let captionEl = null;
+    if (hasAnyCaptions) {
+      captionEl = document.createElement('div');
+      captionEl.className = 'carousel-caption';
+      captionEl.textContent = captionTexts[0];
+      if (!captionTexts[0]) captionEl.style.opacity = '0';
+      el.appendChild(captionEl);
+    }
+
+    if (images.length > 1) {
       const badge = document.createElement('span');
       badge.className = 'carousel-count';
-      badge.textContent = `1 / ${urls.length}`;
+      badge.textContent = `1 / ${images.length}`;
       el.appendChild(badge);
     }
 
-    urls.forEach((_, i) => {
+    images.forEach((_, i) => {
       const dot = document.createElement('button');
       dot.className = 'dot' + (i === 0 ? ' active' : '');
       dot.setAttribute('aria-label', `Photo ${i + 1}`);
@@ -197,7 +233,7 @@
     });
 
     let current = 0;
-    const total = urls.length;
+    const total = images.length;
 
     function goTo(idx, triggerEl) {
       current = ((idx % total) + total) % total;
@@ -205,6 +241,11 @@
       dotsContainer.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
       const c = el.querySelector('.carousel-count');
       if (c) c.textContent = `${current + 1} / ${total}`;
+      if (captionEl) {
+        const txt = captionTexts[current];
+        captionEl.textContent = txt;
+        captionEl.style.opacity = txt ? '1' : '0';
+      }
       if (triggerEl) {
         const r = triggerEl.getBoundingClientRect();
         burstConfetti(r.left + r.width / 2, r.top + r.height / 2, CONFETTI_COLORS);
@@ -246,13 +287,17 @@
     const useGH = isGitHubPages();
     for (const el of carousels) {
       const folder = el.dataset.folder;
-      let urls = [];
+      let images = [];
       try {
-        if (useGH) urls = await fetchFromGitHub(folder);
-        if (!urls.length) urls = await fetchLocal(folder);
-        if (!urls.length && !useGH) urls = await fetchFromGitHub(folder);
+        if (useGH) images = await fetchFromGitHub(folder);
+        if (!images.length) images = await fetchLocal(folder);
+        if (!images.length && !useGH) images = await fetchFromGitHub(folder);
       } catch (err) { console.warn(`Carousel [${folder}]:`, err); }
-      buildCarousel(el, urls);
+      let captions = {};
+      if (images.length) {
+        try { captions = await fetchCaptions(folder); } catch (_) {}
+      }
+      buildCarousel(el, images, captions);
     }
   }
 
