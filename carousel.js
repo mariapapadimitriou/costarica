@@ -274,10 +274,48 @@
     }
   }
 
+  /* ======= DAY COUNTER ======= */
+
+  function setupDayCounter() {
+    const el = document.getElementById('day-counter-text');
+    if (!el) return;
+
+    const tripStart = new Date(2026, 2, 26); // Mar 26, 2026
+    const tripEnd   = new Date(2026, 3, 5);  // Apr 5, 2026
+    const totalDays = 11;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const startMs = tripStart.getTime();
+    const endMs   = tripEnd.getTime();
+    const nowMs   = now.getTime();
+
+    const progressFill = document.querySelector('.progress-fill');
+    const progressLabel = document.querySelector('.progress-label');
+
+    if (nowMs < startMs) {
+      const daysUntil = Math.ceil((startMs - nowMs) / 86400000);
+      el.textContent = daysUntil === 1 ? 'Tomorrow!' : `${daysUntil} days to go!`;
+      if (progressFill) progressFill.style.width = '0%';
+      if (progressLabel) progressLabel.lastElementChild.textContent = 'Not started yet!';
+    } else if (nowMs > endMs) {
+      el.innerHTML = 'Trip complete! 🎉';
+      if (progressFill) progressFill.style.width = '100%';
+      if (progressLabel) progressLabel.lastElementChild.textContent = 'Done!';
+    } else {
+      const dayNum = Math.floor((nowMs - startMs) / 86400000) + 1;
+      el.innerHTML = `Day ${dayNum}<span class="day-counter-sub"> / ${totalDays}</span>`;
+      const pct = Math.round((dayNum / totalDays) * 100);
+      if (progressFill) progressFill.style.width = pct + '%';
+      if (progressLabel) progressLabel.lastElementChild.textContent = `Day ${dayNum} of ${totalDays}`;
+    }
+  }
+
   /* ======= INIT ======= */
 
   async function init() {
     spawnFloatingEmoji();
+    setupDayCounter();
     setupChipBounce();
     setupCardTilt();
     setupStampClick();
