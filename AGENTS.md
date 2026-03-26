@@ -41,9 +41,18 @@ To add captions: create a `captions.json` file in the same folder mapping filena
 ```
 Images without a caption entry simply won't show a caption bar for that slide.
 
+### Embedded EXIF captions
+
+The carousel reads captions from two sources (in priority order):
+1. `captions.json` in the image folder (explicit override)
+2. Embedded EXIF/XMP metadata in the JPEG file (iPhone `ImageDescription`, `UserComment`, or XMP `dc:description`)
+
+When a user adds a caption to a photo in iOS Photos, the caption is stored in the EXIF `ImageDescription` tag. The carousel automatically reads this and displays it below the photo. If `captions.json` also has an entry for that filename, the JSON value takes precedence.
+
 ### Notes
 
 - There are no lint, test, or build steps — the project is pure HTML, CSS, and vanilla JS.
 - Google Fonts (Playfair Display, Inter) are loaded via CDN; an internet connection is needed for correct font rendering.
 - The site is designed for GitHub Pages deployment (static hosting).
 - The GitHub API has rate limits for unauthenticated requests (60/hr). For local dev, the script falls back to HEAD-probing numbered files.
+- For local development, add a `manifest.json` listing image filenames in each `images/<location>/` folder so the carousel can discover images without GitHub API access. The `san-jose` folder already has one.
