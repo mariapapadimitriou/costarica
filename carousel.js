@@ -1,18 +1,12 @@
 /**
- * Auto-loading photo carousel for Costa Rica travel journal.
+ * Costa Rica Travel Journal — Interactive Engine
  *
- * Each .photo-carousel has a data-folder attribute (e.g. "san-jose").
- * The script tries two strategies:
- *   1. GitHub Pages / GitHub API: fetches the file list from the GitHub
- *      Contents API for the repo, then builds <img> tags pointing at the
- *      raw files on the deployed branch.
- *   2. Local fallback: if no GITHUB_REPO meta tag is set, it loads from
- *      a local manifest (images/<folder>/manifest.json) or simply scans
- *      for known extensions via fetch HEAD probing.
- *
- * To add photos: just upload .jpg / .jpeg / .png / .webp files into the
- * matching images/<folder>/ directory. Push to GitHub and the carousel
- * auto-updates on next page load.
+ * - Auto-loading photo carousels (GitHub API + local fallback)
+ * - "Stay tuned!" message when no photos yet
+ * - Confetti on carousel nav & chip clicks
+ * - Floating background emoji
+ * - Stamp animal cycle
+ * - Card tilt on hover
  */
 
 (function () {
@@ -22,147 +16,216 @@
   const REPO = 'mariapapadimitriou/costarica';
   const BRANCH = 'main';
 
+  const CONFETTI_COLORS = ['#e74c3c', '#e67e22', '#f39c12', '#f5b041', '#1abc9c', '#16a085', '#2980b9'];
+
+  /* ======= FLOATING EMOJI ======= */
+
+  function spawnFloatingEmoji() {
+    const emojis = ['🌴', '🌺', '🦜', '🦋', '🐸', '🌿', '🦥', '🐢', '🌊', '🍍', '🥥', '☀️'];
+    const count = Math.min(6, Math.floor(window.innerWidth / 200));
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('span');
+      el.className = 'floating-emoji';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = (Math.random() * 90 + 5) + '%';
+      el.style.animationDuration = (8 + Math.random() * 6) + 's';
+      el.style.animationDelay = (Math.random() * 12) + 's';
+      el.style.fontSize = (1.1 + Math.random() * 1) + 'rem';
+      document.body.appendChild(el);
+    }
+  }
+
+  /* ======= CONFETTI ======= */
+
+  function burstConfetti(x, y, colors) {
+    const count = 14;
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = x + 'px';
+      piece.style.top = y + 'px';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - .5) * .5;
+      const dist = 50 + Math.random() * 80;
+      piece.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+      piece.style.setProperty('--dy', Math.sin(angle) * dist - 30 + 'px');
+      const size = 5 + Math.random() * 7;
+      piece.style.width = size + 'px';
+      piece.style.height = size + 'px';
+      piece.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+      document.body.appendChild(piece);
+      piece.addEventListener('animationend', () => piece.remove());
+    }
+  }
+
+  /* ======= CHIP BOUNCE ======= */
+
+  function setupChipBounce() {
+    document.querySelectorAll('.highlights span').forEach(chip => {
+      chip.addEventListener('click', function () {
+        this.style.animation = 'none';
+        void this.offsetHeight;
+        this.style.animation = 'chipBounce .4s ease';
+        const rect = this.getBoundingClientRect();
+        burstConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2, CONFETTI_COLORS);
+      });
+    });
+    const s = document.createElement('style');
+    s.textContent = '@keyframes chipBounce{0%{transform:scale(1)}30%{transform:scale(1.2) rotate(-3deg)}60%{transform:scale(.92) rotate(2deg)}100%{transform:scale(1) rotate(0)}}';
+    document.head.appendChild(s);
+  }
+
+  /* ======= CARD TILT ======= */
+
+  function setupCardTilt() {
+    if (window.matchMedia('(hover: none)').matches) return;
+    document.querySelectorAll('.day-card').forEach(card => {
+      card.addEventListener('mousemove', function (e) {
+        const r = this.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - .5;
+        const y = (e.clientY - r.top) / r.height - .5;
+        this.style.transform = `perspective(600px) rotateY(${x * 5}deg) rotateX(${-y * 3}deg) translateY(-4px)`;
+      });
+      card.addEventListener('mouseleave', function () { this.style.transform = ''; });
+    });
+  }
+
+  /* ======= STAMP CLICK ======= */
+
+  function setupStampClick() {
+    const stamp = document.querySelector('.postcard-stamp');
+    if (!stamp) return;
+    const animals = ['🐸', '🦜', '🦋', '🦥', '🐢', '🐒', '🦎', '🐆', '🦅', '🦩'];
+    let idx = 0;
+    stamp.addEventListener('click', function () {
+      idx = (idx + 1) % animals.length;
+      this.querySelector('.stamp-icon').textContent = animals[idx];
+      const r = this.getBoundingClientRect();
+      burstConfetti(r.left + r.width / 2, r.top + r.height / 2, CONFETTI_COLORS);
+      this.style.animation = 'none';
+      void this.offsetHeight;
+      this.style.animation = 'stampWiggle .4s ease';
+    });
+    const s = document.createElement('style');
+    s.textContent = '@keyframes stampWiggle{0%{transform:rotate(5deg) scale(1)}25%{transform:rotate(-8deg) scale(1.12)}50%{transform:rotate(8deg) scale(1.08)}75%{transform:rotate(-3deg) scale(1.04)}100%{transform:rotate(5deg) scale(1)}}';
+    document.head.appendChild(s);
+  }
+
+  /* ======= BADGE CLICK ======= */
+
+  function setupBadgeClick() {
+    const badge = document.querySelector('.trip-badge');
+    if (!badge) return;
+    badge.addEventListener('click', function () {
+      const r = this.getBoundingClientRect();
+      burstConfetti(r.left + r.width / 2, r.top + r.height / 2, ['#f5b041', '#fff', '#e67e22']);
+    });
+  }
+
+  /* ======= CAROUSEL ENGINE ======= */
+
   function isGitHubPages() {
     return location.hostname.endsWith('.github.io') || location.hostname.endsWith('.github.com');
   }
 
-  /**
-   * Fetch image list from GitHub Contents API (works for public repos,
-   * no auth needed). Returns an array of raw URLs.
-   */
   async function fetchFromGitHub(folder) {
-    const apiUrl = `https://api.github.com/repos/${REPO}/contents/images/${folder}?ref=${BRANCH}`;
-    const res = await fetch(apiUrl);
+    const url = `https://api.github.com/repos/${REPO}/contents/images/${folder}?ref=${BRANCH}`;
+    const res = await fetch(url);
     if (!res.ok) return [];
     const files = await res.json();
     if (!Array.isArray(files)) return [];
-    return files
-      .filter(f => IMAGE_EXTENSIONS.test(f.name))
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map(f => f.download_url);
+    return files.filter(f => IMAGE_EXTENSIONS.test(f.name)).sort((a, b) => a.name.localeCompare(b.name)).map(f => f.download_url);
   }
 
-  /**
-   * Local development fallback: tries to load a manifest.json listing
-   * filenames, then falls back to probing common filenames.
-   */
   async function fetchLocal(folder) {
-    const basePath = `images/${folder}`;
-
-    // Strategy A: check for a manifest file
+    const base = `images/${folder}`;
     try {
-      const res = await fetch(`${basePath}/manifest.json`);
+      const res = await fetch(`${base}/manifest.json`);
       if (res.ok) {
         const names = await res.json();
-        if (Array.isArray(names)) {
-          return names.filter(n => IMAGE_EXTENSIONS.test(n)).map(n => `${basePath}/${n}`);
-        }
+        if (Array.isArray(names)) return names.filter(n => IMAGE_EXTENSIONS.test(n)).map(n => `${base}/${n}`);
       }
-    } catch (_) { /* noop */ }
-
-    // Strategy B: probe numbered files (photo-1.jpg … photo-20.jpg, etc.)
+    } catch (_) {}
     const found = [];
-    const exts = ['jpg', 'jpeg', 'png', 'webp'];
     for (let i = 1; i <= 30; i++) {
-      for (const ext of exts) {
-        const url = `${basePath}/photo-${i}.${ext}`;
+      for (const ext of ['jpg', 'jpeg', 'png', 'webp']) {
         try {
-          const r = await fetch(url, { method: 'HEAD' });
-          if (r.ok) { found.push(url); break; }
-        } catch (_) { /* noop */ }
+          const r = await fetch(`${base}/photo-${i}.${ext}`, { method: 'HEAD' });
+          if (r.ok) { found.push(`${base}/photo-${i}.${ext}`); break; }
+        } catch (_) {}
       }
     }
     return found;
   }
 
-  /**
-   * Build the carousel UI inside a .photo-carousel element.
-   */
   function buildCarousel(el, urls) {
+    const folder = el.dataset.folder;
+
     if (!urls.length) {
-      el.innerHTML = '<div class="photo-placeholder">📸 No photos yet — upload images to <code>images/' +
-        el.dataset.folder + '/</code> and push to GitHub!</div>';
+      el.innerHTML =
+        '<div class="photo-placeholder">' +
+          '<span class="stay-tuned-icon">📸</span>' +
+          '<span class="stay-tuned-text">Stay tuned!</span>' +
+        '</div>';
       return;
     }
 
     const track = el.querySelector('.carousel-track');
     const dotsContainer = el.querySelector('.carousel-dots');
 
-    // Populate images
     urls.forEach((url, i) => {
       const img = document.createElement('img');
       img.src = url;
-      img.alt = `${el.dataset.folder.replace(/-/g, ' ')} photo ${i + 1}`;
+      img.alt = `${folder.replace(/-/g, ' ')} photo ${i + 1}`;
       img.loading = i === 0 ? 'eager' : 'lazy';
       track.appendChild(img);
     });
 
-    // Add count badge
     if (urls.length > 1) {
-      const countBadge = document.createElement('span');
-      countBadge.className = 'carousel-count';
-      countBadge.textContent = `1 / ${urls.length}`;
-      el.appendChild(countBadge);
+      const badge = document.createElement('span');
+      badge.className = 'carousel-count';
+      badge.textContent = `1 / ${urls.length}`;
+      el.appendChild(badge);
     }
 
-    // Dots
     urls.forEach((_, i) => {
       const dot = document.createElement('button');
       dot.className = 'dot' + (i === 0 ? ' active' : '');
-      dot.setAttribute('aria-label', `Go to photo ${i + 1}`);
+      dot.setAttribute('aria-label', `Photo ${i + 1}`);
       dot.dataset.index = i;
       dotsContainer.appendChild(dot);
     });
 
-    // State
     let current = 0;
     const total = urls.length;
 
-    function goTo(idx) {
+    function goTo(idx, triggerEl) {
       current = ((idx % total) + total) % total;
       track.style.transform = `translateX(-${current * 100}%)`;
-
-      dotsContainer.querySelectorAll('.dot').forEach((d, i) => {
-        d.classList.toggle('active', i === current);
-      });
-
-      const countEl = el.querySelector('.carousel-count');
-      if (countEl) countEl.textContent = `${current + 1} / ${total}`;
+      dotsContainer.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+      const c = el.querySelector('.carousel-count');
+      if (c) c.textContent = `${current + 1} / ${total}`;
+      if (triggerEl) {
+        const r = triggerEl.getBoundingClientRect();
+        burstConfetti(r.left + r.width / 2, r.top + r.height / 2, CONFETTI_COLORS);
+      }
     }
 
-    // Button listeners
-    el.querySelector('.carousel-btn.prev').addEventListener('click', () => goTo(current - 1));
-    el.querySelector('.carousel-btn.next').addEventListener('click', () => goTo(current + 1));
-
-    // Dot listeners
+    el.querySelector('.carousel-btn.prev').addEventListener('click', function () { goTo(current - 1, this); });
+    el.querySelector('.carousel-btn.next').addEventListener('click', function () { goTo(current + 1, this); });
     dotsContainer.addEventListener('click', (e) => {
-      if (e.target.classList.contains('dot')) {
-        goTo(parseInt(e.target.dataset.index, 10));
-      }
+      if (e.target.classList.contains('dot')) goTo(parseInt(e.target.dataset.index, 10), e.target);
     });
 
-    // Touch / swipe support
-    let startX = 0;
-    let startY = 0;
-    let isDragging = false;
-
-    track.addEventListener('touchstart', (e) => {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-      isDragging = true;
-    }, { passive: true });
-
+    let sx = 0, sy = 0, drag = false;
+    track.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; drag = true; }, { passive: true });
     track.addEventListener('touchend', (e) => {
-      if (!isDragging) return;
-      isDragging = false;
-      const dx = e.changedTouches[0].clientX - startX;
-      const dy = e.changedTouches[0].clientY - startY;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-        goTo(dx < 0 ? current + 1 : current - 1);
-      }
+      if (!drag) return;
+      drag = false;
+      const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) goTo(dx < 0 ? current + 1 : current - 1);
     }, { passive: true });
 
-    // Hide buttons if only 1 image
     if (total <= 1) {
       el.querySelector('.carousel-btn.prev').style.display = 'none';
       el.querySelector('.carousel-btn.next').style.display = 'none';
@@ -170,38 +233,29 @@
     }
   }
 
-  /**
-   * Init all carousels on the page.
-   */
-  async function init() {
-    const carousels = document.querySelectorAll('.photo-carousel[data-folder]');
-    const useGitHub = isGitHubPages();
+  /* ======= INIT ======= */
 
+  async function init() {
+    spawnFloatingEmoji();
+    setupChipBounce();
+    setupCardTilt();
+    setupStampClick();
+    setupBadgeClick();
+
+    const carousels = document.querySelectorAll('.photo-carousel[data-folder]');
+    const useGH = isGitHubPages();
     for (const el of carousels) {
       const folder = el.dataset.folder;
       let urls = [];
-
       try {
-        if (useGitHub) {
-          urls = await fetchFromGitHub(folder);
-        }
-        if (!urls.length) {
-          urls = await fetchLocal(folder);
-        }
-        if (!urls.length && !useGitHub) {
-          urls = await fetchFromGitHub(folder);
-        }
-      } catch (err) {
-        console.warn(`Carousel [${folder}]: failed to load images`, err);
-      }
-
+        if (useGH) urls = await fetchFromGitHub(folder);
+        if (!urls.length) urls = await fetchLocal(folder);
+        if (!urls.length && !useGH) urls = await fetchFromGitHub(folder);
+      } catch (err) { console.warn(`Carousel [${folder}]:`, err); }
       buildCarousel(el, urls);
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
