@@ -13,13 +13,15 @@
 
 <header class="site-header">
   <div class="header-deco">
-    <span class="deco deco-1">🌿</span>
+    <span class="deco deco-1">🌴</span>
     <span class="deco deco-2">🌺</span>
     <span class="deco deco-3">🦜</span>
     <span class="deco deco-4">🦥</span>
+    <span class="deco deco-5">🦋</span>
+    <span class="deco deco-6">🌿</span>
   </div>
   <div class="postcard-stamp">
-    <span class="stamp-icon">🦋</span>
+    <span class="stamp-icon">🐸</span>
     <span class="stamp-text">Costa Rica</span>
   </div>
   <div class="header-content">
@@ -27,14 +29,12 @@
     <p class="greetings-from">Greetings from</p>
     <h1><span>Costa Rica!</span></h1>
     <p class="tagline">Maria's Adventure Journal &middot; 2026</p>
-    <!-- STATUS OPTIONS: class="trip-badge departing" / "active" / "done" -->
     <div class="trip-badge departing">✈️ Departing Soon</div>
   </div>
 </header>
 
 <main>
 
-  <!-- Overview Stats -->
   <section class="overview">
     <div class="container">
       <div class="overview-grid">
@@ -49,7 +49,7 @@
           <span class="ov-value">5 Stops</span>
         </div>
         <div class="overview-card">
-          <span class="ov-icon">🌿</span>
+          <span class="ov-icon">🤙</span>
           <span class="ov-label">Vibes</span>
           <span class="ov-value">Pura Vida</span>
         </div>
@@ -57,33 +57,28 @@
     </div>
   </section>
 
-  <!-- Progress Bar -->
   <section class="progress-section">
     <div class="container">
       <div class="progress-label">
         <span>Trip Progress</span>
-        <!-- Update as you go: "Stop 1 of 5", "Stop 2 of 5", etc. -->
         <span>Not started yet!</span>
       </div>
       <div class="progress-bar">
-        <!-- Update width: 0% pre-trip, 20% stop 1, 40% stop 2 ... 100% done -->
         <div class="progress-fill" style="width: 0%"></div>
       </div>
     </div>
   </section>
 
-  <!-- Itinerary Timeline -->
   <section class="itinerary">
     <div class="container">
       <h2 class="section-title">The Itinerary</h2>
+      <p class="section-subtitle">5 stops, endless adventure 🌎</p>
 
       <div class="timeline">
 
         <!-- ============ STOP 1: SAN JOSÉ ============ -->
-        <!-- To update: change class to "timeline-item current" then "timeline-item visited" -->
-        <!-- Also update the status-tag class + text, and the timeline-dot emoji -->
-        <div class="timeline-item upcoming">
-          <div class="timeline-dot">🔜</div>
+        <div class="timeline-item upcoming" data-color="coral">
+          <div class="timeline-dot">🏙️</div>
           <div class="day-card">
             <div class="day-header">
               <div class="day-meta">
@@ -99,7 +94,6 @@
               <span>Barrio Amón</span>
               <span>Gallo Pinto</span>
             </div>
-            <!-- CAROUSEL: auto-populated from images/san-jose/ -->
             <div class="photo-carousel" data-folder="san-jose">
               <div class="carousel-track"></div>
               <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
@@ -109,9 +103,11 @@
           </div>
         </div>
 
+        <div class="fun-fact">🦎 Fun fact: Costa Rica has over 5% of the world's biodiversity!</div>
+
         <!-- ============ STOP 2: COUP SAN JUAN ============ -->
-        <div class="timeline-item upcoming">
-          <div class="timeline-dot">🔜</div>
+        <div class="timeline-item upcoming" data-color="sky">
+          <div class="timeline-dot">🌊</div>
           <div class="day-card">
             <div class="day-header">
               <div class="day-meta">
@@ -126,7 +122,6 @@
               <span>Fresh Seafood</span>
               <span>Local Life</span>
             </div>
-            <!-- CAROUSEL: auto-populated from images/coup-san-juan/ -->
             <div class="photo-carousel" data-folder="coup-san-juan">
               <div class="carousel-track"></div>
               <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
@@ -136,9 +131,11 @@
           </div>
         </div>
 
+        <div class="fun-fact">🐢 Fun fact: Sea turtles nest on both the Caribbean and Pacific coasts!</div>
+
         <!-- ============ STOP 3: LA FORTUNA ============ -->
-        <div class="timeline-item upcoming">
-          <div class="timeline-dot">🔜</div>
+        <div class="timeline-item upcoming" data-color="orange">
+          <div class="timeline-dot">🌋</div>
           <div class="day-card">
             <div class="day-header">
               <div class="day-meta">
@@ -154,7 +151,6 @@
               <span>Hot Springs</span>
               <span>Hanging Bridges</span>
             </div>
-            <!-- CAROUSEL: auto-populated from images/la-fortuna/ -->
             <div class="photo-carousel" data-folder="la-fortuna">
               <div class="carousel-track"></div>
               <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
@@ -164,9 +160,11 @@
           </div>
         </div>
 
+        <div class="fun-fact">🌡️ Fun fact: Arenal's hot springs are heated by underground volcanic activity!</div>
+
         <!-- ============ STOP 4: MONTEVERDE ============ -->
-        <div class="timeline-item upcoming">
-          <div class="timeline-dot">🔜</div>
+        <div class="timeline-item upcoming" data-color="green">
+          <div class="timeline-dot">☁️</div>
           <div class="day-card">
             <div class="day-header">
               <div class="day-meta">
@@ -182,7 +180,6 @@
               <span>Quetzal Watching</span>
               <span>Sky Walk</span>
             </div>
-            <!-- CAROUSEL: auto-populated from images/monteverde/ -->
             <div class="photo-carousel" data-folder="monteverde">
               <div class="carousel-track"></div>
               <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
@@ -192,9 +189,11 @@
           </div>
         </div>
 
+        <div class="fun-fact">🦅 Fun fact: The resplendent quetzal was sacred to the ancient Maya!</div>
+
         <!-- ============ STOP 5: SANTA TERESA ============ -->
-        <div class="timeline-item upcoming">
-          <div class="timeline-dot">🔜</div>
+        <div class="timeline-item upcoming" data-color="purple">
+          <div class="timeline-dot">🏄</div>
           <div class="day-card">
             <div class="day-header">
               <div class="day-meta">
@@ -210,7 +209,6 @@
               <span>Nicoya Peninsula</span>
               <span>Jungle Yoga</span>
             </div>
-            <!-- CAROUSEL: auto-populated from images/santa-teresa/ -->
             <div class="photo-carousel" data-folder="santa-teresa">
               <div class="carousel-track"></div>
               <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
@@ -220,13 +218,14 @@
           </div>
         </div>
 
-      </div><!-- /timeline -->
+      </div>
     </div>
   </section>
 
 </main>
 
 <footer>
+  <div class="footer-emoji">🌴 🦜 🌺 🦥 🌿 🐸 🦋</div>
   <div class="container">
     <p>Made with 🌴 &amp; Pura Vida spirit &nbsp;·&nbsp; <a href="https://github.com/mariapapadimitriou/costarica">View on GitHub</a></p>
   </div>
