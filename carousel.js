@@ -412,7 +412,7 @@
 
   const STOPS = [
     { folder: 'san-jose',      name: 'San José',      emoji: '🏙️', startDay: 1,  endDay: 1  },
-    { folder: 'coup-san-juan', name: 'Coop San Juan',  emoji: '🌊', startDay: 2,  endDay: 2  },
+    { folder: 'coup-san-juan', name: 'Coop San Juan',  emoji: '🏡', startDay: 2,  endDay: 2  },
     { folder: 'la-fortuna',    name: 'La Fortuna',     emoji: '🌋', startDay: 3,  endDay: 4  },
     { folder: 'monteverde',    name: 'Monteverde',     emoji: '☁️', startDay: 5,  endDay: 6  },
     { folder: 'santa-teresa',  name: 'Santa Teresa',   emoji: '🏄', startDay: 7,  endDay: 10 },
