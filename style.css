@@ -283,11 +283,53 @@ body {
 }
 
 /* ===================================================
+   DAY COUNTER
+   =================================================== */
+
+.day-counter-section {
+  margin-top: -50px;
+  padding-bottom: 14px;
+  position: relative;
+  z-index: 2;
+}
+
+.day-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--white);
+  border-radius: 100px;
+  padding: 14px 28px;
+  box-shadow: var(--shadow);
+  max-width: 360px;
+  margin: 0 auto;
+  border: 2px solid rgba(231,76,60,.12);
+}
+
+.day-counter-icon { font-size: 1.4rem; }
+
+.day-counter-text {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--red);
+}
+
+.day-counter-sub {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: .78rem;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+/* ===================================================
    OVERVIEW CARDS — Warm parchment with color accents
    =================================================== */
 
 .overview {
-  margin-top: -50px;
+  margin-top: 0;
   padding-bottom: 8px;
   position: relative;
   z-index: 2;
