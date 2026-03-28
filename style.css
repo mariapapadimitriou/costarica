@@ -728,8 +728,6 @@ body {
   text-align: center;
   line-height: 1.5;
   border-top: 1px solid rgba(107,66,38,.06);
-  transition: opacity .3s;
-  min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -749,8 +747,8 @@ body {
   z-index: 2;
 }
 
-/* Push count badge up when caption or dots are present */
-.carousel-caption ~ .carousel-count { bottom: 90px; }
+/* Push count badge up when dots are visible below the image */
+.carousel-dots:not(:empty) ~ .carousel-count { bottom: 46px; }
 
 /* "Stay tuned!" placeholder */
 .photo-placeholder {
