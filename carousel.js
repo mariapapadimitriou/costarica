@@ -855,7 +855,7 @@
         try { dates = await fetchDates(folder); } catch (_) {}
         // Fetch EXIF caption + date in one pass; skip files already in dates.json
         var embeddedResults = await Promise.all(images.map(function (img) {
-          if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name) || dates[img.name])
+          if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name) || captions[img.name])
             return Promise.resolve({ caption: '', date: '' });
           return extractEmbeddedData(img.url);
         }));
