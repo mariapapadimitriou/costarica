@@ -145,17 +145,89 @@
     return '';
   }
 
-  async function extractEmbeddedCaption(imageUrl) {
+  async function extractEmbeddedData(imageUrl) {
     try {
       var resp = await fetch(imageUrl);
-      if (!resp.ok) return '';
+      if (!resp.ok) return { caption: '', date: '' };
       var buf = await resp.arrayBuffer();
       var caption = extractEXIFCaption(buf);
       if (!caption) caption = extractXMPCaption(buf);
-      return caption;
+      var date = extractEXIFDate(buf);
+      return { caption: caption, date: date };
     } catch (_) {
+      return { caption: '', date: '' };
+    }
+  }
+
+  /* Parse DateTimeOriginal (0x9003) from EXIF — returns "YYYY:MM:DD HH:MM:SS" or '' */
+
+  function extractEXIFDate(arrayBuffer) {
+    var view = new DataView(arrayBuffer);
+    if (view.getUint16(0) !== 0xFFD8) return '';
+    var offset = 2;
+    while (offset < view.byteLength - 1) {
+      var marker = view.getUint16(offset);
+      if (marker === 0xFFDA) break;
+      if ((marker & 0xFF00) !== 0xFF00) break;
+      var segLen = view.getUint16(offset + 2);
+      if (marker === 0xFFE1) {
+        var d = parseAPP1Date(arrayBuffer, offset + 4, segLen - 2);
+        if (d) return d;
+      }
+      offset += 2 + segLen;
+    }
+    return '';
+  }
+
+  function parseAPP1Date(buf, start, length) {
+    var view = new DataView(buf, start, length);
+    var h = '';
+    for (var k = 0; k < 4; k++) h += String.fromCharCode(view.getUint8(k));
+    if (h !== 'Exif') return '';
+    var tiffOff = start + 6;
+    var tv = new DataView(buf, tiffOff);
+    var be = tv.getUint16(0) === 0x4D4D;
+    function r16(o) { return be ? tv.getUint16(o) : tv.getUint16(o, true); }
+    function r32(o) { return be ? tv.getUint32(o) : tv.getUint32(o, true); }
+    function findStr(ifdOff, tag) {
+      var n = r16(ifdOff);
+      for (var i = 0; i < n; i++) {
+        var e = ifdOff + 2 + i * 12;
+        if (r16(e) !== tag) continue;
+        var cnt = r32(e + 4);
+        var off = cnt > 4 ? r32(e + 8) : (e + 8 - tiffOff);
+        return readUTF8(buf, tiffOff + off, cnt).trim();
+      }
       return '';
     }
+    var ifd0 = r32(4);
+    // Find Exif sub-IFD (tag 0x8769)
+    var exifOff = 0;
+    var n0 = r16(ifd0);
+    for (var i = 0; i < n0; i++) {
+      var e = ifd0 + 2 + i * 12;
+      if (r16(e) === 0x8769) { exifOff = r32(e + 8); break; }
+    }
+    if (exifOff) {
+      var dto = findStr(exifOff, 0x9003); // DateTimeOriginal
+      if (dto) return dto;
+    }
+    return findStr(ifd0, 0x0132); // DateTime fallback
+  }
+
+  /* Parse date from filenames like 20260327_105631_... */
+  function parseDateFromFilename(name) {
+    var m = name.match(/^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+    if (m) return m[1] + ':' + m[2] + ':' + m[3] + ' ' + m[4] + ':' + m[5] + ':' + m[6];
+    return '';
+  }
+
+  /* Convert "YYYY:MM:DD HH:MM:SS" to a timestamp */
+  function exifDateToMs(str) {
+    if (!str) return 0;
+    var norm = str.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3');
+    var t = Date.parse(norm);
+    return isNaN(t) ? 0 : t;
   }
 
   /* ======= FLOATING EMOJI ======= */
@@ -764,15 +836,21 @@
       let captions = {};
       if (images.length) {
         try { captions = await fetchCaptions(folder); } catch (_) {}
+        // Fetch EXIF caption + DateTimeOriginal in a single pass per JPEG
         var embeddedResults = await Promise.all(images.map(function (img) {
-          if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name)) return Promise.resolve('');
-          return extractEmbeddedCaption(img.url);
+          if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name))
+            return Promise.resolve({ caption: '', date: '' });
+          return extractEmbeddedData(img.url);
         }));
         for (var i = 0; i < images.length; i++) {
-          if (!captions[images[i].name] && embeddedResults[i]) {
-            captions[images[i].name] = embeddedResults[i];
-          }
+          if (!captions[images[i].name] && embeddedResults[i].caption)
+            captions[images[i].name] = embeddedResults[i].caption;
         }
+        // Sort newest → oldest by EXIF date, falling back to filename date
+        images = images.map(function (img, i) {
+          var dateStr = embeddedResults[i].date || parseDateFromFilename(img.name);
+          return { img: img, ts: exifDateToMs(dateStr) };
+        }).sort(function (a, b) { return b.ts - a.ts; }).map(function (d) { return d.img; });
       }
       buildPhotoDisplay(el, images, captions);
     }
