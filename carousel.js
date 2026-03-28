@@ -30,12 +30,11 @@
 
   function readUTF8(buf, offset, length) {
     var bytes = new Uint8Array(buf, offset, length);
-    var s = '';
-    for (var i = 0; i < bytes.length; i++) {
-      if (bytes[i] === 0) break;
-      s += String.fromCharCode(bytes[i]);
-    }
-    return s;
+    // Find null terminator
+    var end = 0;
+    while (end < bytes.length && bytes[end] !== 0) end++;
+    // TextDecoder handles multi-byte UTF-8 correctly (including emojis)
+    return new TextDecoder('utf-8').decode(bytes.subarray(0, end));
   }
 
   function extractEXIFCaption(arrayBuffer) {
@@ -488,12 +487,6 @@
     lbEl._open(images, captions, startIdx);
   }
 
-  /* ======= EMOJI STRIPPING ======= */
-
-  function stripEmojis(str) {
-    return str.replace(/\p{Emoji}/gu, '').replace(/\s+/g, ' ').trim();
-  }
-
   /* ======= INLINE CAROUSEL ======= */
 
   function buildPhotoDisplay(el, images, captions) {
@@ -510,7 +503,7 @@
     }
 
     var total        = images.length;
-    var captionTexts = images.map(function (img) { return stripEmojis(captions[img.name] || ''); });
+    var captionTexts = images.map(function (img) { return captions[img.name] || ''; });
     var current      = 0;
 
     // Track
@@ -862,7 +855,7 @@
         try { dates = await fetchDates(folder); } catch (_) {}
         // Fetch EXIF caption + date in one pass; skip files already in dates.json
         var embeddedResults = await Promise.all(images.map(function (img) {
-          if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name) || dates[img.name])
+          if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name) || captions[img.name])
             return Promise.resolve({ caption: '', date: '' });
           return extractEmbeddedData(img.url);
         }));
