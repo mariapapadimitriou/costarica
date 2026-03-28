@@ -691,6 +691,8 @@ body {
 .carousel-btn.prev { left: 8px; }
 .carousel-btn.next { right: 8px; }
 
+.carousel-dots:empty { display: none; }
+
 .carousel-dots {
   display: flex;
   justify-content: center;
