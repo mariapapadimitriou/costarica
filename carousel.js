@@ -398,6 +398,12 @@
     lbEl._open(images, captions, startIdx);
   }
 
+  /* ======= EMOJI STRIPPING ======= */
+
+  function stripEmojis(str) {
+    return str.replace(/\p{Emoji}/gu, '').replace(/\s+/g, ' ').trim();
+  }
+
   /* ======= INLINE CAROUSEL ======= */
 
   function buildPhotoDisplay(el, images, captions) {
@@ -414,7 +420,7 @@
     }
 
     var total        = images.length;
-    var captionTexts = images.map(function (img) { return captions[img.name] || ''; });
+    var captionTexts = images.map(function (img) { return stripEmojis(captions[img.name] || ''); });
     var current      = 0;
 
     // Track
@@ -446,7 +452,7 @@
       captionEl = document.createElement('div');
       captionEl.className = 'carousel-caption';
       captionEl.textContent = captionTexts[0];
-      if (!captionTexts[0]) captionEl.style.opacity = '0';
+      if (!captionTexts[0]) captionEl.style.display = 'none';
       el.appendChild(captionEl);
     }
 
@@ -500,7 +506,7 @@
       if (captionEl) {
         var txt = captionTexts[current];
         captionEl.textContent = txt;
-        captionEl.style.opacity = txt ? '1' : '0';
+        captionEl.style.display = txt ? '' : 'none';
       }
       if (triggerEl) {
         var r = triggerEl.getBoundingClientRect();
