@@ -1,10 +1,12 @@
 /**
  * Costa Rica Travel Journal — Interactive Engine
  *
- * - Auto-loading photo carousels (GitHub API + local fallback)
+ * - Photo grid display (click any photo to open fullscreen lightbox)
+ * - Lightbox carousel: portrait & landscape aware, object-fit: contain
+ * - Auto-loading photos (GitHub API + local fallback)
  * - Embedded EXIF / XMP caption extraction (reads iPhone captions)
  * - "Stay tuned!" message when no photos yet
- * - Confetti on carousel nav & chip clicks
+ * - Confetti on lightbox nav & chip clicks
  * - Floating background emoji
  * - Stamp animal cycle
  * - Card tilt on hover
@@ -19,6 +21,9 @@
   const BRANCH = 'main';
 
   const CONFETTI_COLORS = ['#e74c3c', '#e67e22', '#f39c12', '#f5b041', '#1abc9c', '#16a085', '#2980b9'];
+
+  // Max thumbnails shown in grid before "+N more" overlay
+  const MAX_GRID_VISIBLE = 9;
 
   /* ======= EMBEDDED CAPTION EXTRACTION (EXIF / XMP) ======= */
 
@@ -256,7 +261,205 @@
     });
   }
 
-  /* ======= CAROUSEL ENGINE ======= */
+  /* ======= LIGHTBOX ======= */
+
+  var lbEl = null;
+
+  function initLightbox() {
+    lbEl = document.createElement('div');
+    lbEl.className = 'lightbox';
+    lbEl.setAttribute('role', 'dialog');
+    lbEl.setAttribute('aria-modal', 'true');
+    lbEl.setAttribute('aria-label', 'Photo viewer');
+    lbEl.style.display = 'none';
+
+    lbEl.innerHTML =
+      '<button class="lb-close" aria-label="Close">&#x2715;</button>' +
+      '<div class="lb-media"><img class="lb-img" src="" alt="" /></div>' +
+      '<div class="lb-footer">' +
+        '<div class="lb-caption"></div>' +
+        '<div class="lb-count"></div>' +
+        '<div class="lb-dots"></div>' +
+      '</div>' +
+      '<button class="lb-btn lb-prev" aria-label="Previous photo">&#8249;</button>' +
+      '<button class="lb-btn lb-next" aria-label="Next photo">&#8250;</button>';
+
+    document.body.appendChild(lbEl);
+
+    var imgEl     = lbEl.querySelector('.lb-img');
+    var captionEl = lbEl.querySelector('.lb-caption');
+    var countEl   = lbEl.querySelector('.lb-count');
+    var dotsEl    = lbEl.querySelector('.lb-dots');
+    var prevBtn   = lbEl.querySelector('.lb-prev');
+    var nextBtn   = lbEl.querySelector('.lb-next');
+    var closeBtn  = lbEl.querySelector('.lb-close');
+
+    var lbImages   = [];
+    var lbCaptions = [];
+    var lbCurrent  = 0;
+
+    function goTo(idx) {
+      var total = lbImages.length;
+      lbCurrent = ((idx % total) + total) % total;
+      imgEl.src = lbImages[lbCurrent].url;
+      imgEl.alt = lbCaptions[lbCurrent] || ('Photo ' + (lbCurrent + 1));
+      captionEl.textContent = lbCaptions[lbCurrent] || '';
+      captionEl.style.opacity = lbCaptions[lbCurrent] ? '1' : '0';
+      countEl.textContent = (lbCurrent + 1) + ' / ' + total;
+      dotsEl.querySelectorAll('.lb-dot').forEach(function (d, i) {
+        d.classList.toggle('active', i === lbCurrent);
+      });
+    }
+
+    function open(images, captions, startIdx) {
+      lbImages   = images;
+      lbCaptions = captions;
+
+      // Rebuild dots (only when ≤15 photos — more is too crowded)
+      dotsEl.innerHTML = '';
+      if (images.length > 1 && images.length <= 15) {
+        images.forEach(function (_, i) {
+          var dot = document.createElement('button');
+          dot.className = 'lb-dot' + (i === startIdx ? ' active' : '');
+          dot.setAttribute('aria-label', 'Photo ' + (i + 1));
+          dot.dataset.index = i;
+          dotsEl.appendChild(dot);
+        });
+      }
+
+      prevBtn.style.display = images.length > 1 ? '' : 'none';
+      nextBtn.style.display = images.length > 1 ? '' : 'none';
+
+      lbEl.style.display = 'flex';
+      // Double rAF to trigger CSS transition after display:flex
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { lbEl.classList.add('active'); });
+      });
+      document.body.style.overflow = 'hidden';
+
+      goTo(startIdx);
+    }
+
+    function close() {
+      lbEl.classList.remove('active');
+      setTimeout(function () {
+        lbEl.style.display = 'none';
+        document.body.style.overflow = '';
+      }, 260);
+    }
+
+    prevBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      burstConfetti(e.clientX, e.clientY, CONFETTI_COLORS);
+      goTo(lbCurrent - 1);
+    });
+    nextBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      burstConfetti(e.clientX, e.clientY, CONFETTI_COLORS);
+      goTo(lbCurrent + 1);
+    });
+
+    dotsEl.addEventListener('click', function (e) {
+      if (e.target.classList.contains('lb-dot')) {
+        goTo(parseInt(e.target.dataset.index, 10));
+      }
+    });
+
+    closeBtn.addEventListener('click', close);
+
+    // Click on dark backdrop closes lightbox
+    lbEl.addEventListener('click', function (e) {
+      if (e.target === lbEl) close();
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function (e) {
+      if (!lbEl.classList.contains('active')) return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(lbCurrent + 1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(lbCurrent - 1);
+      if (e.key === 'Escape') close();
+    });
+
+    // Touch swipe
+    var touchStartX = 0;
+    lbEl.addEventListener('touchstart', function (e) {
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    lbEl.addEventListener('touchend', function (e) {
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 40) goTo(dx < 0 ? lbCurrent + 1 : lbCurrent - 1);
+    }, { passive: true });
+
+    lbEl._open = open;
+  }
+
+  function openLightbox(images, captions, startIdx) {
+    if (!lbEl) initLightbox();
+    lbEl._open(images, captions, startIdx);
+  }
+
+  /* ======= PHOTO GRID (replaces inline carousel) ======= */
+
+  function buildPhotoDisplay(el, images, captions) {
+    var folder = el.dataset.folder;
+    el.innerHTML = '';
+
+    if (!images.length) {
+      el.innerHTML =
+        '<div class="photo-placeholder">' +
+          '<span class="stay-tuned-icon">📸</span>' +
+          '<span class="stay-tuned-text">Stay tuned!</span>' +
+        '</div>';
+      return;
+    }
+
+    var captionTexts = images.map(function (img) { return captions[img.name] || ''; });
+
+    var visibleCount = Math.min(images.length, MAX_GRID_VISIBLE);
+    var hiddenCount  = images.length - visibleCount;
+
+    var grid = document.createElement('div');
+    grid.className = 'photo-grid';
+
+    for (var i = 0; i < visibleCount; i++) {
+      (function (idx) {
+        var item = document.createElement('div');
+        item.className = 'photo-grid-item';
+
+        var imgEl = document.createElement('img');
+        imgEl.src = images[idx].url;
+        imgEl.alt = captionTexts[idx] || (folder.replace(/-/g, ' ') + ' photo ' + (idx + 1));
+        imgEl.loading = idx < 3 ? 'eager' : 'lazy';
+        item.appendChild(imgEl);
+
+        // Last visible tile with hidden photos → "+N more" overlay
+        if (idx === visibleCount - 1 && hiddenCount > 0) {
+          var overlay = document.createElement('div');
+          overlay.className = 'photo-grid-more';
+          overlay.textContent = '+' + hiddenCount;
+          item.appendChild(overlay);
+        }
+
+        item.addEventListener('click', function () {
+          openLightbox(images, captionTexts, idx);
+        });
+
+        grid.appendChild(item);
+      }(i));
+    }
+
+    el.appendChild(grid);
+
+    // Count badge below grid
+    if (images.length > 1) {
+      var badge = document.createElement('div');
+      badge.className = 'grid-photo-count';
+      badge.textContent = images.length + ' photos \u2014 tap to explore';
+      el.appendChild(badge);
+    }
+  }
+
+  /* ======= IMAGE FETCHING ======= */
 
   function isGitHubPages() {
     return location.hostname.endsWith('.github.io') || location.hostname.endsWith('.github.com');
@@ -313,99 +516,6 @@
       }
     }
     return found;
-  }
-
-  function buildCarousel(el, images, captions) {
-    const folder = el.dataset.folder;
-
-    if (!images.length) {
-      el.innerHTML =
-        '<div class="photo-placeholder">' +
-          '<span class="stay-tuned-icon">📸</span>' +
-          '<span class="stay-tuned-text">Stay tuned!</span>' +
-        '</div>';
-      return;
-    }
-
-    const track = el.querySelector('.carousel-track');
-    const dotsContainer = el.querySelector('.carousel-dots');
-
-    const captionTexts = images.map(img => captions[img.name] || '');
-
-    images.forEach((img, i) => {
-      const imgEl = document.createElement('img');
-      imgEl.src = img.url;
-      imgEl.alt = captionTexts[i] || `${folder.replace(/-/g, ' ')} photo ${i + 1}`;
-      imgEl.loading = i === 0 ? 'eager' : 'lazy';
-      track.appendChild(imgEl);
-    });
-
-    const hasAnyCaptions = captionTexts.some(c => c);
-
-    let captionEl = null;
-    if (hasAnyCaptions) {
-      captionEl = document.createElement('div');
-      captionEl.className = 'carousel-caption';
-      captionEl.textContent = captionTexts[0];
-      if (!captionTexts[0]) captionEl.style.opacity = '0';
-      el.appendChild(captionEl);
-    }
-
-    if (images.length > 1) {
-      const badge = document.createElement('span');
-      badge.className = 'carousel-count';
-      badge.textContent = `1 / ${images.length}`;
-      el.appendChild(badge);
-    }
-
-    images.forEach((_, i) => {
-      const dot = document.createElement('button');
-      dot.className = 'dot' + (i === 0 ? ' active' : '');
-      dot.setAttribute('aria-label', `Photo ${i + 1}`);
-      dot.dataset.index = i;
-      dotsContainer.appendChild(dot);
-    });
-
-    let current = 0;
-    const total = images.length;
-
-    function goTo(idx, triggerEl) {
-      current = ((idx % total) + total) % total;
-      track.style.transform = `translateX(-${current * 100}%)`;
-      dotsContainer.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
-      const c = el.querySelector('.carousel-count');
-      if (c) c.textContent = `${current + 1} / ${total}`;
-      if (captionEl) {
-        const txt = captionTexts[current];
-        captionEl.textContent = txt;
-        captionEl.style.opacity = txt ? '1' : '0';
-      }
-      if (triggerEl) {
-        const r = triggerEl.getBoundingClientRect();
-        burstConfetti(r.left + r.width / 2, r.top + r.height / 2, CONFETTI_COLORS);
-      }
-    }
-
-    el.querySelector('.carousel-btn.prev').addEventListener('click', function () { goTo(current - 1, this); });
-    el.querySelector('.carousel-btn.next').addEventListener('click', function () { goTo(current + 1, this); });
-    dotsContainer.addEventListener('click', (e) => {
-      if (e.target.classList.contains('dot')) goTo(parseInt(e.target.dataset.index, 10), e.target);
-    });
-
-    let sx = 0, sy = 0, drag = false;
-    track.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; drag = true; }, { passive: true });
-    track.addEventListener('touchend', (e) => {
-      if (!drag) return;
-      drag = false;
-      const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) goTo(dx < 0 ? current + 1 : current - 1);
-    }, { passive: true });
-
-    if (total <= 1) {
-      el.querySelector('.carousel-btn.prev').style.display = 'none';
-      el.querySelector('.carousel-btn.next').style.display = 'none';
-      dotsContainer.style.display = 'none';
-    }
   }
 
   /* ======= STOPS SCHEDULE ======= */
@@ -549,7 +659,7 @@
           }
         }
       }
-      buildCarousel(el, images, captions);
+      buildPhotoDisplay(el, images, captions);
     }
   }
 
