@@ -22,8 +22,8 @@
 
   const CONFETTI_COLORS = ['#e74c3c', '#e67e22', '#f39c12', '#f5b041', '#1abc9c', '#16a085', '#2980b9'];
 
-  // Max thumbnails shown in grid before "+N more" overlay
-  const MAX_GRID_VISIBLE = 9;
+  // Dot indicators are hidden above this count (just show counter instead)
+  const DOTS_MAX = 10;
 
   /* ======= EMBEDDED CAPTION EXTRACTION (EXIF / XMP) ======= */
 
@@ -398,7 +398,7 @@
     lbEl._open(images, captions, startIdx);
   }
 
-  /* ======= PHOTO GRID (replaces inline carousel) ======= */
+  /* ======= INLINE CAROUSEL ======= */
 
   function buildPhotoDisplay(el, images, captions) {
     var folder = el.dataset.folder;
@@ -413,49 +413,124 @@
       return;
     }
 
+    var total        = images.length;
     var captionTexts = images.map(function (img) { return captions[img.name] || ''; });
+    var current      = 0;
 
-    var visibleCount = Math.min(images.length, MAX_GRID_VISIBLE);
-    var hiddenCount  = images.length - visibleCount;
+    // Track
+    var track = document.createElement('div');
+    track.className = 'carousel-track';
 
-    var grid = document.createElement('div');
-    grid.className = 'photo-grid';
+    images.forEach(function (img, i) {
+      var slide = document.createElement('div');
+      slide.className = 'carousel-slide';
 
-    for (var i = 0; i < visibleCount; i++) {
-      (function (idx) {
-        var item = document.createElement('div');
-        item.className = 'photo-grid-item';
+      var imgEl = document.createElement('img');
+      imgEl.src = img.url;
+      imgEl.alt = captionTexts[i] || (folder.replace(/-/g, ' ') + ' photo ' + (i + 1));
+      imgEl.loading = i === 0 ? 'eager' : 'lazy';
+      // Clicking the photo opens the lightbox at the current index
+      imgEl.style.cursor = 'zoom-in';
+      imgEl.addEventListener('click', function () { openLightbox(images, captionTexts, current); });
 
-        var imgEl = document.createElement('img');
-        imgEl.src = images[idx].url;
-        imgEl.alt = captionTexts[idx] || (folder.replace(/-/g, ' ') + ' photo ' + (idx + 1));
-        imgEl.loading = idx < 3 ? 'eager' : 'lazy';
-        item.appendChild(imgEl);
+      slide.appendChild(imgEl);
+      track.appendChild(slide);
+    });
 
-        // Last visible tile with hidden photos → "+N more" overlay
-        if (idx === visibleCount - 1 && hiddenCount > 0) {
-          var overlay = document.createElement('div');
-          overlay.className = 'photo-grid-more';
-          overlay.textContent = '+' + hiddenCount;
-          item.appendChild(overlay);
-        }
+    el.appendChild(track);
 
-        item.addEventListener('click', function () {
-          openLightbox(images, captionTexts, idx);
-        });
-
-        grid.appendChild(item);
-      }(i));
+    // Caption
+    var hasAnyCaptions = captionTexts.some(function (c) { return c; });
+    var captionEl = null;
+    if (hasAnyCaptions) {
+      captionEl = document.createElement('div');
+      captionEl.className = 'carousel-caption';
+      captionEl.textContent = captionTexts[0];
+      if (!captionTexts[0]) captionEl.style.opacity = '0';
+      el.appendChild(captionEl);
     }
 
-    el.appendChild(grid);
+    // Counter badge
+    var countBadge = null;
+    if (total > 1) {
+      countBadge = document.createElement('span');
+      countBadge.className = 'carousel-count';
+      countBadge.textContent = '1 / ' + total;
+      el.appendChild(countBadge);
+    }
 
-    // Count badge below grid
-    if (images.length > 1) {
-      var badge = document.createElement('div');
-      badge.className = 'grid-photo-count';
-      badge.textContent = images.length + ' photos \u2014 tap to explore';
-      el.appendChild(badge);
+    // Prev / Next buttons
+    var prevBtn = document.createElement('button');
+    prevBtn.className = 'carousel-btn prev';
+    prevBtn.setAttribute('aria-label', 'Previous');
+    prevBtn.innerHTML = '&#8249;';
+
+    var nextBtn = document.createElement('button');
+    nextBtn.className = 'carousel-btn next';
+    nextBtn.setAttribute('aria-label', 'Next');
+    nextBtn.innerHTML = '&#8250;';
+
+    el.appendChild(prevBtn);
+    el.appendChild(nextBtn);
+
+    // Dots (only when not too many photos)
+    var dotsContainer = document.createElement('div');
+    dotsContainer.className = 'carousel-dots';
+    var showDots = total > 1 && total <= DOTS_MAX;
+    if (showDots) {
+      images.forEach(function (_, i) {
+        var dot = document.createElement('button');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Photo ' + (i + 1));
+        dot.dataset.index = i;
+        dotsContainer.appendChild(dot);
+      });
+    }
+    el.appendChild(dotsContainer);
+
+    function goTo(idx, triggerEl) {
+      current = ((idx % total) + total) % total;
+      track.style.transform = 'translateX(-' + (current * 100) + '%)';
+      if (showDots) {
+        dotsContainer.querySelectorAll('.dot').forEach(function (d, i) {
+          d.classList.toggle('active', i === current);
+        });
+      }
+      if (countBadge) countBadge.textContent = (current + 1) + ' / ' + total;
+      if (captionEl) {
+        var txt = captionTexts[current];
+        captionEl.textContent = txt;
+        captionEl.style.opacity = txt ? '1' : '0';
+      }
+      if (triggerEl) {
+        var r = triggerEl.getBoundingClientRect();
+        burstConfetti(r.left + r.width / 2, r.top + r.height / 2, CONFETTI_COLORS);
+      }
+    }
+
+    prevBtn.addEventListener('click', function () { goTo(current - 1, this); });
+    nextBtn.addEventListener('click', function () { goTo(current + 1, this); });
+
+    if (showDots) {
+      dotsContainer.addEventListener('click', function (e) {
+        if (e.target.classList.contains('dot')) goTo(parseInt(e.target.dataset.index, 10), e.target);
+      });
+    }
+
+    // Touch swipe on track
+    var sx = 0, sy = 0, drag = false;
+    track.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; drag = true; }, { passive: true });
+    track.addEventListener('touchend', function (e) {
+      if (!drag) return;
+      drag = false;
+      var dx = e.changedTouches[0].clientX - sx;
+      var dy = e.changedTouches[0].clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) goTo(dx < 0 ? current + 1 : current - 1);
+    }, { passive: true });
+
+    if (total <= 1) {
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
     }
   }
 
