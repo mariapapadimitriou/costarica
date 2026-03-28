@@ -15,7 +15,8 @@
 (function () {
   'use strict';
 
-  const IMAGE_EXTENSIONS = /\.(jpe?g|png|webp|gif|avif)$/i;
+  const MEDIA_EXTENSIONS = /\.(jpe?g|png|webp|gif|avif|mp4|mov|webm)$/i;
+  const VIDEO_EXTENSIONS = /\.(mp4|mov|webm)$/i;
   const JPEG_EXTENSIONS  = /\.(jpe?g)$/i;
   const REPO = 'mariapapadimitriou/costarica';
   const BRANCH = 'main';
@@ -275,7 +276,10 @@
 
     lbEl.innerHTML =
       '<button class="lb-close" aria-label="Close">&#x2715;</button>' +
-      '<div class="lb-media"><img class="lb-img" src="" alt="" /></div>' +
+      '<div class="lb-media">' +
+        '<img class="lb-img" src="" alt="" />' +
+        '<video class="lb-video" controls playsinline></video>' +
+      '</div>' +
       '<div class="lb-footer">' +
         '<div class="lb-caption"></div>' +
         '<div class="lb-count"></div>' +
@@ -287,6 +291,7 @@
     document.body.appendChild(lbEl);
 
     var imgEl     = lbEl.querySelector('.lb-img');
+    var videoEl   = lbEl.querySelector('.lb-video');
     var captionEl = lbEl.querySelector('.lb-caption');
     var countEl   = lbEl.querySelector('.lb-count');
     var dotsEl    = lbEl.querySelector('.lb-dots');
@@ -300,11 +305,23 @@
 
     function goTo(idx) {
       var total = lbImages.length;
+      // Pause any playing video before switching
+      videoEl.pause();
       lbCurrent = ((idx % total) + total) % total;
-      imgEl.src = lbImages[lbCurrent].url;
-      imgEl.alt = lbCaptions[lbCurrent] || ('Photo ' + (lbCurrent + 1));
+      var item = lbImages[lbCurrent];
+      if (VIDEO_EXTENSIONS.test(item.name)) {
+        imgEl.style.display = 'none';
+        videoEl.style.display = '';
+        videoEl.src = item.url;
+      } else {
+        videoEl.style.display = 'none';
+        videoEl.src = '';
+        imgEl.style.display = '';
+        imgEl.src = item.url;
+        imgEl.alt = lbCaptions[lbCurrent] || ('Photo ' + (lbCurrent + 1));
+      }
       captionEl.textContent = lbCaptions[lbCurrent] || '';
-      captionEl.style.opacity = lbCaptions[lbCurrent] ? '1' : '0';
+      captionEl.style.display = lbCaptions[lbCurrent] ? '' : 'none';
       countEl.textContent = (lbCurrent + 1) + ' / ' + total;
       dotsEl.querySelectorAll('.lb-dot').forEach(function (d, i) {
         d.classList.toggle('active', i === lbCurrent);
@@ -341,6 +358,7 @@
     }
 
     function close() {
+      videoEl.pause();
       lbEl.classList.remove('active');
       setTimeout(function () {
         lbEl.style.display = 'none';
@@ -431,15 +449,24 @@
       var slide = document.createElement('div');
       slide.className = 'carousel-slide';
 
-      var imgEl = document.createElement('img');
-      imgEl.src = img.url;
-      imgEl.alt = captionTexts[i] || (folder.replace(/-/g, ' ') + ' photo ' + (i + 1));
-      imgEl.loading = i === 0 ? 'eager' : 'lazy';
-      // Clicking the photo opens the lightbox at the current index
-      imgEl.style.cursor = 'zoom-in';
-      imgEl.addEventListener('click', function () { openLightbox(images, captionTexts, current); });
+      if (VIDEO_EXTENSIONS.test(img.name)) {
+        var videoEl = document.createElement('video');
+        videoEl.src = img.url;
+        videoEl.controls = true;
+        videoEl.muted = true;
+        videoEl.playsInline = true;
+        videoEl.preload = 'metadata';
+        slide.appendChild(videoEl);
+      } else {
+        var imgEl = document.createElement('img');
+        imgEl.src = img.url;
+        imgEl.alt = captionTexts[i] || (folder.replace(/-/g, ' ') + ' photo ' + (i + 1));
+        imgEl.loading = i === 0 ? 'eager' : 'lazy';
+        imgEl.style.cursor = 'zoom-in';
+        imgEl.addEventListener('click', function () { openLightbox(images, captionTexts, current); });
+        slide.appendChild(imgEl);
+      }
 
-      slide.appendChild(imgEl);
       track.appendChild(slide);
     });
 
@@ -497,6 +524,11 @@
     }
 
     function goTo(idx, triggerEl) {
+      // Pause any video on the slide we're leaving
+      var prevSlide = track.children[current];
+      var prevVideo = prevSlide && prevSlide.querySelector('video');
+      if (prevVideo) prevVideo.pause();
+
       current = ((idx % total) + total) % total;
       track.style.transform = 'translateX(-' + (current * 100) + '%)';
       if (showDots) {
@@ -576,7 +608,7 @@
     if (!res.ok) return [];
     const files = await res.json();
     if (!Array.isArray(files)) return [];
-    return files.filter(f => IMAGE_EXTENSIONS.test(f.name)).sort((a, b) => a.name.localeCompare(b.name)).map(f => ({ url: f.download_url, name: f.name }));
+    return files.filter(f => MEDIA_EXTENSIONS.test(f.name)).sort((a, b) => a.name.localeCompare(b.name)).map(f => ({ url: f.download_url, name: f.name }));
   }
 
   async function fetchLocal(folder) {
@@ -585,7 +617,7 @@
       const res = await fetch(`${base}/manifest.json`);
       if (res.ok) {
         const names = await res.json();
-        if (Array.isArray(names)) return names.filter(n => IMAGE_EXTENSIONS.test(n)).map(n => ({ url: `${base}/${n}`, name: n }));
+        if (Array.isArray(names)) return names.filter(n => MEDIA_EXTENSIONS.test(n)).map(n => ({ url: `${base}/${n}`, name: n }));
       }
     } catch (_) {}
     const found = [];
@@ -733,7 +765,7 @@
       if (images.length) {
         try { captions = await fetchCaptions(folder); } catch (_) {}
         var embeddedResults = await Promise.all(images.map(function (img) {
-          if (!JPEG_EXTENSIONS.test(img.name)) return Promise.resolve('');
+          if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name)) return Promise.resolve('');
           return extractEmbeddedCaption(img.url);
         }));
         for (var i = 0; i < images.length; i++) {

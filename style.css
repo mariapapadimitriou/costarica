@@ -649,8 +649,9 @@ body {
   justify-content: center;
 }
 
-/* Image fills frame without cropping — works for both portrait & landscape */
-.carousel-slide img {
+/* Image/video fills frame without cropping — works for both portrait & landscape */
+.carousel-slide img,
+.carousel-slide video {
   max-width: 100%;
   max-height: 100%;
   width: auto;
@@ -802,16 +803,19 @@ body {
   min-height: 0;
 }
 
-.lb-img {
+.lb-img,
+.lb-video {
   max-width: 100%;
   max-height: 100%;
   width: auto;
   height: auto;
-  object-fit: contain;    /* shows full photo — portrait & landscape */
+  object-fit: contain;
   border-radius: 6px;
   box-shadow: 0 10px 50px rgba(0,0,0,.6);
   display: block;
 }
+
+.lb-video { display: none; }
 
 /* Footer: caption + counter + dots */
 .lb-footer {
