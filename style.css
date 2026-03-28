@@ -628,7 +628,7 @@ body {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
-  background: #1a1a1a;   /* dark bg fills letterbox bars on portrait photos */
+  background: var(--sand);
   border: 1px solid rgba(107,66,38,.08);
 }
 
