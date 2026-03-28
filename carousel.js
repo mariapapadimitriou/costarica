@@ -492,7 +492,9 @@
         dotsContainer.appendChild(dot);
       });
     }
-    el.appendChild(dotsContainer);
+    if (showDots) {
+      el.appendChild(dotsContainer);
+    }
 
     function goTo(idx, triggerEl) {
       current = ((idx % total) + total) % total;
