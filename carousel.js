@@ -652,6 +652,28 @@
     return location.hostname.endsWith('.github.io') || location.hostname.endsWith('.github.com');
   }
 
+  async function fetchDates(folder) {
+    const base = `images/${folder}`;
+    try {
+      const res = await fetch(`${base}/dates.json`);
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    if (isGitHubPages()) {
+      try {
+        const url = `https://api.github.com/repos/${REPO}/contents/images/${folder}/dates.json?ref=${BRANCH}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const file = await res.json();
+          if (file.download_url) {
+            const r2 = await fetch(file.download_url);
+            if (r2.ok) return await r2.json();
+          }
+        }
+      } catch (_) {}
+    }
+    return {};
+  }
+
   async function fetchCaptions(folder) {
     const base = `images/${folder}`;
     try {
@@ -834,21 +856,25 @@
         if (!images.length && !useGH) images = await fetchFromGitHub(folder);
       } catch (err) { console.warn(`Carousel [${folder}]:`, err); }
       let captions = {};
+      let dates = {};
       if (images.length) {
         try { captions = await fetchCaptions(folder); } catch (_) {}
-        // Fetch EXIF caption + DateTimeOriginal in a single pass per JPEG
+        try { dates = await fetchDates(folder); } catch (_) {}
+        // Fetch EXIF caption + date in one pass; skip files already in dates.json
         var embeddedResults = await Promise.all(images.map(function (img) {
-          if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name))
+          if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name) || dates[img.name])
             return Promise.resolve({ caption: '', date: '' });
           return extractEmbeddedData(img.url);
         }));
         for (var i = 0; i < images.length; i++) {
           if (!captions[images[i].name] && embeddedResults[i].caption)
             captions[images[i].name] = embeddedResults[i].caption;
+          if (!dates[images[i].name] && embeddedResults[i].date)
+            dates[images[i].name] = embeddedResults[i].date;
         }
-        // Sort newest → oldest by EXIF date, falling back to filename date
-        images = images.map(function (img, i) {
-          var dateStr = embeddedResults[i].date || parseDateFromFilename(img.name);
+        // Sort newest → oldest; filename date as last-resort fallback
+        images = images.map(function (img) {
+          var dateStr = dates[img.name] || parseDateFromFilename(img.name);
           return { img: img, ts: exifDateToMs(dateStr) };
         }).sort(function (a, b) { return b.ts - a.ts; }).map(function (d) { return d.img; });
       }
