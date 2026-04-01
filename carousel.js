@@ -145,18 +145,25 @@
   }
 
   async function extractEmbeddedData(imageUrl) {
+    var buf = null;
+    // Try Range request first (512KB covers most EXIF); fall back to full fetch on failure
     try {
-      // EXIF data is always in the first few KB — Range request avoids downloading full images
-      var resp = await fetch(imageUrl, { headers: { 'Range': 'bytes=0-131071' } });
-      if (!resp.ok && resp.status !== 206) return { caption: '', date: '' };
-      var buf = await resp.arrayBuffer();
-      var caption = extractEXIFCaption(buf);
-      if (!caption) caption = extractXMPCaption(buf);
-      var date = extractEXIFDate(buf);
-      return { caption: caption, date: date };
-    } catch (_) {
-      return { caption: '', date: '' };
+      var resp = await fetch(imageUrl, { headers: { 'Range': 'bytes=0-524287' } });
+      if (resp.ok || resp.status === 206) buf = await resp.arrayBuffer();
+    } catch (_) {}
+    if (!buf) {
+      try {
+        var resp2 = await fetch(imageUrl);
+        if (resp2.ok) buf = await resp2.arrayBuffer();
+      } catch (_) {}
     }
+    if (!buf) return { caption: '', date: '' };
+    var caption = '';
+    try { caption = extractEXIFCaption(buf); } catch (_) {}
+    if (!caption) try { caption = extractXMPCaption(buf); } catch (_) {}
+    var date = '';
+    try { date = extractEXIFDate(buf); } catch (_) {}
+    return { caption: caption, date: date };
   }
 
   /* Parse DateTimeOriginal (0x9003) from EXIF — returns "YYYY:MM:DD HH:MM:SS" or '' */
