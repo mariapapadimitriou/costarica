@@ -146,8 +146,9 @@
 
   async function extractEmbeddedData(imageUrl) {
     try {
-      var resp = await fetch(imageUrl);
-      if (!resp.ok) return { caption: '', date: '' };
+      // EXIF data is always in the first few KB — Range request avoids downloading full images
+      var resp = await fetch(imageUrl, { headers: { 'Range': 'bytes=0-131071' } });
+      if (!resp.ok && resp.status !== 206) return { caption: '', date: '' };
       var buf = await resp.arrayBuffer();
       var caption = extractEXIFCaption(buf);
       if (!caption) caption = extractXMPCaption(buf);
@@ -537,16 +538,12 @@
 
     el.appendChild(track);
 
-    // Caption
-    var hasAnyCaptions = captionTexts.some(function (c) { return c; });
-    var captionEl = null;
-    if (hasAnyCaptions) {
-      captionEl = document.createElement('div');
-      captionEl.className = 'carousel-caption';
-      captionEl.textContent = captionTexts[0];
-      if (!captionTexts[0]) captionEl.style.display = 'none';
-      el.appendChild(captionEl);
-    }
+    // Caption element always present so progressive updates can show it later
+    var captionEl = document.createElement('div');
+    captionEl.className = 'carousel-caption';
+    captionEl.textContent = captionTexts[0];
+    captionEl.style.display = captionTexts[0] ? '' : 'none';
+    el.appendChild(captionEl);
 
     // Counter badge
     var countBadge = null;
@@ -637,6 +634,15 @@
       prevBtn.style.display = 'none';
       nextBtn.style.display = 'none';
     }
+
+    // Returned so the init loop can push in captions that arrive later
+    return function updateCaption(idx, text) {
+      captionTexts[idx] = text;
+      if (idx === current) {
+        captionEl.textContent = text;
+        captionEl.style.display = text ? '' : 'none';
+      }
+    };
   }
 
   /* ======= IMAGE FETCHING ======= */
@@ -853,25 +859,23 @@
       if (images.length) {
         try { captions = await fetchCaptions(folder); } catch (_) {}
         try { dates = await fetchDates(folder); } catch (_) {}
-        // Fetch EXIF caption + date for all JPEGs; EXIF takes priority over captions.json
-        var embeddedResults = await Promise.all(images.map(function (img) {
-          if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name))
-            return Promise.resolve({ caption: '', date: '' });
-          return extractEmbeddedData(img.url);
-        }));
-        for (var i = 0; i < images.length; i++) {
-          if (embeddedResults[i].caption)
-            captions[images[i].name] = embeddedResults[i].caption; // EXIF wins
-          if (!dates[images[i].name] && embeddedResults[i].date)
-            dates[images[i].name] = embeddedResults[i].date;
-        }
-        // Sort newest → oldest; filename date as last-resort fallback
+        // Sort immediately using dates.json — no need to wait for EXIF
         images = images.map(function (img) {
-          var dateStr = dates[img.name] || parseDateFromFilename(img.name);
-          return { img: img, ts: exifDateToMs(dateStr) };
+          var ds = dates[img.name] || parseDateFromFilename(img.name);
+          return { img: img, ts: exifDateToMs(ds) };
         }).sort(function (a, b) { return b.ts - a.ts; }).map(function (d) { return d.img; });
       }
-      buildPhotoDisplay(el, images, captions);
+      // Build carousel immediately with whatever captions we have
+      var updateCaption = buildPhotoDisplay(el, images, captions);
+      // Fetch EXIF captions in background using Range requests (128 KB each)
+      // EXIF overrides captions.json; runs in parallel without blocking the carousel
+      Promise.all(images.map(function (img, idx) {
+        if (!JPEG_EXTENSIONS.test(img.name) || VIDEO_EXTENSIONS.test(img.name))
+          return Promise.resolve();
+        return extractEmbeddedData(img.url).then(function (data) {
+          if (data.caption) updateCaption(idx, data.caption);
+        }).catch(function () {});
+      }));
     }
   }
 
