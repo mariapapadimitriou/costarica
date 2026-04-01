@@ -866,7 +866,7 @@
         }).sort(function (a, b) { return b.ts - a.ts; }).map(function (d) { return d.img; });
       }
       // Build carousel immediately with whatever captions we have
-      var updateCaption = buildPhotoDisplay(el, images, captions);
+      const updateCaption = buildPhotoDisplay(el, images, captions);
       // Fetch EXIF captions in background using Range requests (128 KB each)
       // EXIF overrides captions.json; runs in parallel without blocking the carousel
       Promise.all(images.map(function (img, idx) {
